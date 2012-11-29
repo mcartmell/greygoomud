@@ -1,15 +1,15 @@
+require 'json'
 require 'sinatra/base'
 require 'sinatra/synchrony'
 require 'redis'
 require 'redis/connection/synchrony'
+require 'arml'
 
 class Mud < Sinatra::Base
   register Sinatra::Synchrony
-  attr_reader :redis_url
 
   def initialize
-    @redis_url = ENV["REDISTOGO_URL"]
-    super
+    ENV["ARML_REDIS_URL"] = ENV["REDISTOGO_URL"]
   end
 
 
@@ -18,7 +18,17 @@ class Mud < Sinatra::Base
     "Hello world!"
   end
   
-  get '/foo' do
-    redis_url
+#  get '/foo' do
+#    "hai"
+#  end
+
+  get '/create' do
+    key = Arml::Room.new({ name: "one", description: "desc" }).save
+    key
+  end
+
+  get '/load/:id' do |id|
+    room = Arml::Room.load(id)
+    room.to_json
   end
 end
