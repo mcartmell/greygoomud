@@ -17,6 +17,7 @@ class Arml
 				conn = EM::Mongo::Connection.new(uri.host, uri.port)
 				puts uri
 				db = conn.db uri.path[1..-1]
+				puts "authenticating to #{uri.path[1..-1]} with #{uri.user} and #{uri.password}"
 				db.authenticate uri.user,uri.password
       else
         conn = EM::Mongo::Connection.new('localhost')
