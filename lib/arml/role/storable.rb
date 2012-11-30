@@ -6,6 +6,9 @@ class Arml
     module Storable
       module ClassMethods
         def load(key)
+					unless key.is_a?(BSON::ObjectId)
+						key = BSON::ObjectId.from_string(key)
+					end
 					result = EM::Synchrony.sync coll.find_one({:_id => key})
           return self.new(result)
         end

@@ -17,8 +17,9 @@ class Mud < Sinatra::Base
   end
   
   get '/create' do
+		puts "hai\n"
     key = Arml::Room.new({ name: "one", description: "desc" }).save
-    key.inspect
+    return key._id.to_s
   end
 
   get '/load/:id' do |id|

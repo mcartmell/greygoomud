@@ -15,7 +15,7 @@ class Arml
     end
 
     def to_json(*a)
-      hash = orig_to_h
+      hash = to_h
       hash.update(
       {
       })
