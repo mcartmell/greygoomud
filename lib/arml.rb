@@ -17,7 +17,8 @@ class Arml
 					mongolab = URI.parse(mongo_url)
 					conn = EM::Mongo::Connection.new mongolab.host, mongolab.port, 1, {:reconnect_in => 1}
 					db = conn.db mongolab.path.gsub(/^\//, '')
-					db.authenticate mongolab.user, mongolab.password
+					resp = db.authenticate mongolab.user, mongolab.password
+					puts resp.inspect
 					db
 				end
     #    uri = URI.parse(ENV["ARML_MONGO_URI"])
