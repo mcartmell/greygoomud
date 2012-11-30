@@ -7,7 +7,7 @@ class Mud < Sinatra::Base
   register Sinatra::Synchrony
 
   def initialize
-    ENV["ARML_MONGO_URL"] = ENV["MONGOLAB_URI"]
+    ENV["ARML_MONGO_URI"] = ENV["MONGOLAB_URI"]
   end
 
 
