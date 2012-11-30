@@ -21,17 +21,11 @@ class Arml
 					conn = EM::Mongo::Connection.new mongolab.host, mongolab.port
 					db = conn.db(mongolab.path[1..-1])
 					puts "using #{mongolab.user} #{mongolab.password}\n"
-					db.authenticate mongolab.user, mongolab.password
-					#db.collection("foo").insert({name: "mikec"})
+					result = EM::Synchrony.sync db.authenticate mongolab.user, mongolab.password
+					puts result
 
 					puts "done authenticating #{db}\n"
 #				end
-    #    uri = URI.parse(ENV["ARML_MONGO_URI"])
-		#		conn = EM::Mongo::Connection.new(uri.host, uri.port, 1, {:reconnect_in => 1})
-		#		puts uri
-		#		db = conn.db uri.path[1..-1]
-		#		puts "authenticating to #{uri.path[1..-1]} with #{uri.user} and #{uri.password}"
-		#		p db.authenticate(uri.user,uri.password)
       else
         conn = EM::Mongo::Connection.new('localhost')
 				db = conn.db("arml")
