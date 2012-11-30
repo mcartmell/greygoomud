@@ -8,6 +8,7 @@ class Arml
     @@db = nil
 
     def self.db
+			puts "here again #{@@db}"
       return @@db if @@db
       db = ""
 			conn = ""
@@ -18,9 +19,11 @@ class Arml
 					mongolab = URI.parse(mongo_url)
 					puts "still here connecting to #{mongolab.host} #{mongolab.port}\n"
 					conn = EM::Mongo::Connection.new mongolab.host, mongolab.port
-					db = conn.db mongolab.path[1..-1]
+					db = conn.db(mongolab.path[1..-1])
 					puts "using #{mongolab.user} #{mongolab.password}\n"
-					resp = db.authenticate mongolab.user, mongolab.password
+					db.authenticate mongolab.user, mongolab.password
+
+					puts "done authenticating #{db}\n"
 #				end
     #    uri = URI.parse(ENV["ARML_MONGO_URI"])
 		#		conn = EM::Mongo::Connection.new(uri.host, uri.port, 1, {:reconnect_in => 1})
