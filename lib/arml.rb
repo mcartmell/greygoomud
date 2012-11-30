@@ -14,7 +14,7 @@ class Arml
 
       if mongo_url = ENV["ARML_MONGO_URL"]
         uri = URI.parse(ENV["ARML_MONGO_URL"])
-				conn = EM::Mongo::Connection.from_uri(ENV['MONGOLAB_URI'])
+				conn = EM::Mongo::Connection.from_uri(uri.host, uri.port)
       else
         conn = EM::Mongo::Connection.new('localhost')
       end
