@@ -13,14 +13,15 @@ class Arml
 			conn = ""
 
       if mongo_url = ENV["ARML_MONGO_URI"]
-				EventMachine::Synchrony::ConnectionPool.new(size: 20) do
+					puts mongo_url
+#				EventMachine::Synchrony::ConnectionPool.new(size: 20) do
 					mongolab = URI.parse(mongo_url)
 					conn = EM::Mongo::Connection.new mongolab.host, mongolab.port, 1, {:reconnect_in => 1}
 					db = conn.db mongolab.path.gsub(/^\//, '')
 					resp = db.authenticate mongolab.user, mongolab.password
 					puts resp.inspect
 					db
-				end
+#				end
     #    uri = URI.parse(ENV["ARML_MONGO_URI"])
 		#		conn = EM::Mongo::Connection.new(uri.host, uri.port, 1, {:reconnect_in => 1})
 		#		puts uri
