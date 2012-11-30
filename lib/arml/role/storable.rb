@@ -10,6 +10,7 @@ class Arml
 						key = BSON::ObjectId.from_string(key)
 					end
 					result = EM::Synchrony.sync coll.find_one({:_id => key})
+					p result
           return self.new(result)
         end
       end
