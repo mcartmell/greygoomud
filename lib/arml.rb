@@ -14,11 +14,11 @@ class Arml
 
       if mongo_url = ENV["ARML_MONGO_URI"]
         uri = URI.parse(ENV["ARML_MONGO_URI"])
-				conn = EM::Mongo::Connection.new(uri.host, uri.port)
+				conn = EM::Mongo::Connection.new(uri.host, uri.port, 1, {:reconnect_in => 1})
 				puts uri
 				db = conn.db uri.path[1..-1]
 				puts "authenticating to #{uri.path[1..-1]} with #{uri.user} and #{uri.password}"
-				db.authenticate uri.user,uri.password
+				puts db.authenticate(uri.user,uri.password)
       else
         conn = EM::Mongo::Connection.new('localhost')
 				db = conn.db("arml")
