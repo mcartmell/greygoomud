@@ -21,7 +21,8 @@ class Arml
 				db.authenticate uri.user,uri.password
       else
         conn = EM::Mongo::Connection.new('localhost')
+				db = conn.db("arml")
       end
-      @@db = conn.db('arml')
+      @@db = db
     end
 end
