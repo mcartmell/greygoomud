@@ -22,6 +22,7 @@ class Arml
 					db = conn.db(mongolab.path[1..-1])
 					puts "using #{mongolab.user} #{mongolab.password}\n"
 					db.authenticate mongolab.user, mongolab.password
+					db.collection("foo").insert({name: "mikec"})
 
 					puts "done authenticating #{db}\n"
 #				end
