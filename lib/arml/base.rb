@@ -1,30 +1,19 @@
-require "redis"
-module Arml
+class Arml
   class Base
     attr_reader :db
 
-    @@db = nil
     @@db_key = ""
 
     def db_key
       @@db_key
     end
 
-    def self.db
-      return @@db if @@db
-      db = ""
-
-      if redis_url = ENV["ARML_REDIS_URL"]
-        uri = URI.parse(ENV["ARML_REDIS_URL"])
-        db = Redis.new(:host => uri.host, :port => uri.port, :password => uri.password)
-      else
-        db = Redis.new
-      end
-      @@db = db
-    end
+		def self.coll
+			Arml.db.collection(@@db_key)
+		end
 
     def db
-      Arml::Base.db
+      Arml.db
     end
 
     def initialize(hash = {})

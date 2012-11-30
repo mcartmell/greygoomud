@@ -16,11 +16,15 @@ class Arml
       end
 
 			def coll
-				return Arml.db.collection(db_key)
+				return Arml.db.collection(key)
 			end
 
+      def key
+        return db_key
+      end
+
       def save
-        mykey = db_key
+        mykey = key
 				if (_id)
 					return db_update
 				else
@@ -30,7 +34,7 @@ class Arml
 
 			def db_insert
 				newid = coll.insert(to_h)
-				return Arml::Room.load(newid)
+				return self.send(:load, newid.to_s)
 			end
 
 			def db_update

@@ -1,13 +1,26 @@
-module Arml
+require "json"
+class Arml
   class Common < Arml::Base
-    attr_accessor :id, :name, :description
+    attr_accessor :_id, :name, :description
+
+		def id
+			_id
+		end
 
     def to_h
       return {
-        :id => id,
         :name => name,
         :description => description
       }
     end
+
+    def to_json(*a)
+      hash = orig_to_h
+      hash.update(
+      {
+      })
+      hash.to_json(*a)
+    end
+
   end
 end

@@ -3,8 +3,8 @@ require "arml/common"
 require "arml/role/storable"
 
 class Arml
-  class Room < Arml::Common
-    @@db_key = "room"
+  class Player < Arml::Common
+    @@db_key = "player"
     include Arml::Role::Storable
 
   end
