@@ -16,8 +16,9 @@ class Arml
 					puts mongo_url
 #				EventMachine::Synchrony::ConnectionPool.new(size: 20) do
 					mongolab = URI.parse(mongo_url)
+					puts "still here\n"
 					conn = EM::Mongo::Connection.new mongolab.host, mongolab.port, 1, {:reconnect_in => 1}
-					db = conn.db mongolab.path.gsub(/^\//, '')
+					db = conn.db mongolab.path[1..-1]
 					resp = db.authenticate mongolab.user, mongolab.password
 					puts resp.inspect
 					db
