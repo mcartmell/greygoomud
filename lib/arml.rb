@@ -16,12 +16,11 @@ class Arml
 					puts mongo_url
 #				EventMachine::Synchrony::ConnectionPool.new(size: 20) do
 					mongolab = URI.parse(mongo_url)
-					puts "still here\n"
-					conn = EM::Mongo::Connection.new mongolab.host, mongolab.port, 1, {:reconnect_in => 1}
+					puts "still here connecting to #{mongolab.host} #{mongolab.port}\n"
+					conn = EM::Mongo::Connection.new mongolab.host, mongolab.port
 					db = conn.db mongolab.path[1..-1]
+					puts "using #{mongolab.user} #{mongolab.password}\n"
 					resp = db.authenticate mongolab.user, mongolab.password
-					puts resp.inspect
-					db
 #				end
     #    uri = URI.parse(ENV["ARML_MONGO_URI"])
 		#		conn = EM::Mongo::Connection.new(uri.host, uri.port, 1, {:reconnect_in => 1})
