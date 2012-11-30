@@ -16,8 +16,8 @@ class Arml
         uri = URI.parse(ENV["ARML_MONGO_URI"])
 				conn = EM::Mongo::Connection.new(uri.host, uri.port)
 				puts uri
-				db = conn.db uri.path.gsub(/^\//, '')
-				db.authenticate uri.user uri.password
+				db = conn.db uri.path[1..-1]
+				db.authenticate uri.user,uri.password
       else
         conn = EM::Mongo::Connection.new('localhost')
       end
