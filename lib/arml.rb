@@ -18,7 +18,7 @@ class Arml
 				puts uri
 				db = conn.db uri.path[1..-1]
 				puts "authenticating to #{uri.path[1..-1]} with #{uri.user} and #{uri.password}"
-				puts db.authenticate(uri.user,uri.password)
+				p db.authenticate(uri.user,uri.password)
       else
         conn = EM::Mongo::Connection.new('localhost')
 				db = conn.db("arml")
