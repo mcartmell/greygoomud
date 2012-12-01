@@ -4,15 +4,18 @@ require "arml/role/storable"
 
 class Arml
   class Player < Arml::Common
-    @@db_key = "player"
+    DB_KEY = "player"
+
     include Arml::Role::Storable
 
 		attr_accessor :current_room
 
+# @param [Int] room_id The room id to move to
 		def move_to_room_id(room_id, *a)
 			move_to_room(Arml::Room.load(room_id), *a)
 		end
 
+# @param [Arml::Room] room The room to move to
 		def move_to_room(room, force = false)
 			where = {}
 			if !force

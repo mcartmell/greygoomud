@@ -1,4 +1,6 @@
 require "arml/room"
+require "arml/player"
+require "arml/object"
 require "arml/base"
 require "em-mongo"
 require 'eventmachine'
@@ -7,6 +9,7 @@ class Arml
 
     @@db = nil
 
+# The database accessor
     def self.db
       return @@db if @@db
       db = ""

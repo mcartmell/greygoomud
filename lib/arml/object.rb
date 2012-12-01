@@ -4,7 +4,7 @@ require "arml/role/storable"
 
 class Arml
   class Object < Arml::Common
-    @@db_key = "object"
+    DB_KEY = "object"
     include Arml::Role::Storable
 
   end

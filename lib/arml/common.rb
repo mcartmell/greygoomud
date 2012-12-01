@@ -3,10 +3,12 @@ class Arml
   class Common < Arml::Base
     attr_accessor :_id, :name, :description
 
+# @return [BSON::ObjectId] The mongo object id
 		def id
 			_id
 		end
 
+# @return [Hash] A hash suitable for saving to the database
     def to_h
 			hash = {}
 			self.instance_variables.each do |v|
@@ -22,15 +24,18 @@ class Arml
 			return hash
     end
 
+# @return [String] A json representation of the resource
     def to_json(*a)
-      to_h.to_json(*a)
+      to_resource.to_json(*a)
     end
 
+# @return [Array] A list of keys that should be used to restrict the resource hash
 		def rkeys
 			hash = to_h
 			return hash.keys
 		end
 
+# @return [Hash] A hash representing the api resource
 		def to_resource
 			hash = to_h
 			hash.keep_if { |k| rkeys.include?(k) }

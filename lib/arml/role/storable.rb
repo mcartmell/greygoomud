@@ -5,30 +5,52 @@ class Arml
   module Role
     module Storable
       module ClassMethods
+
+# Gets the row from the database as a hash
+#
+# @param [Object] key Either a BSON::ObjectId or a String
+# @return [Hash] The hash from the db
 				def retrieve(key)
 					unless key.is_a?(BSON::ObjectId)
 						key = BSON::ObjectId.from_string(key)
 					end
 					result = EM::Synchrony.sync coll.find_one({:_id => key})
+					return result
 				end
+
+# Loads an object by id
+#
+# @param [Object] key See #retrieve
+# @return [Arml::Base]
 
         def load(key)
           return self.new(retrieve(key))
         end
       end
 
+# Replaces the current object with the one from the database
+#
+# @param [Object] key See #retrieve
 			def load(key)
 				self.set_from_hash(self.class.retrieve(key))
+				return true
 			end
 
       def self.included includer
         includer.extend ClassMethods
       end
 
+			def to_s
+				return _id.to_s if _id
+				return ""
+			end
+
+# Retrieves the Mongo collection for this class
 			def coll
 				return Arml.db.collection(db_key)
 			end
 
+# Upserts the current object. Updates if _id is set
       def save
         mykey = db_key
 				if (_id)
@@ -38,8 +60,8 @@ class Arml
 				end
       end
 
+# Like save, but ensures the the current object is updated from the db
 			def save!
-				# like save but replaces the object
 				id = self.save
 				self.load(id)
 			end
@@ -50,6 +72,7 @@ class Arml
 				end
 			end
 
+# Reloads the object from the database
 			def reload
 				self.load(_id)
 			end
@@ -61,7 +84,7 @@ class Arml
 			end
 
 			def db_update_all
-				coll.update({_id: _id}, to_h)
+				db_update({}, to_h)
 			end
 
 			def db_update(where = {}, cols = {}, opts = {})
