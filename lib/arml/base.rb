@@ -15,12 +15,20 @@ class Arml
     def db
       Arml.db
     end
-
-    def initialize(hash = {})
+		
+    def set_from_hash(hash = {})
       hash.each do |k,v|
         self.send(k.to_s + '=', v)
       end
+			do_coercions
     end
+
+		def do_coercions
+		end
+
+		def initialize(hash)
+			set_from_hash(hash)
+		end
 
   end
 end
