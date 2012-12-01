@@ -12,6 +12,7 @@ class Arml
 
 # @param [Int] room_id The room id to move to
 		def move_to_room_id(room_id, *a)
+			puts "FFFFSSSSS"
 			move_to_room(Arml::Room.load(room_id), *a)
 		end
 
@@ -23,6 +24,8 @@ class Arml
 			end
 			if force || current_room.connected_to?(room)
 				self.db_set(where, { current_room: room._id })
+			else
+				raise Arml::Error, "That room isn't connected to your current room"
 			end
 		end
 

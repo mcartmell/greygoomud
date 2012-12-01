@@ -6,6 +6,8 @@ require "em-mongo"
 require 'eventmachine'
 
 class Arml
+		class Error < Exception
+		end
 
     @@db = nil
 

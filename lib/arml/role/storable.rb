@@ -97,6 +97,7 @@ class Arml
 			def db_set(where = {}, cols = {}, opts = {})
 				where[:_id] = _id
 				fields = { "$set" => cols }
+				puts "doing set where #{where} - #{fields}"
 				res = EM::Synchrony.sync coll.safe_update(where, fields, opts)
 				handle_error(res)
 				return res

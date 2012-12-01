@@ -4,17 +4,30 @@ require 'sinatra/synchrony'
 require 'arml'
 
 class Mud < Sinatra::Base
+	class Error < Arml::Error
+	end
+
   register Sinatra::Synchrony
 
 	set :reload_templates, false
-	set :show_errors, false
+	set :show_exceptions, false
+
+	def player
+		@current_player
+	end
 
 	before do
 		@current_player = Arml::Player.load("50ba0260b4a3494370000003")
 	end
 
+	error Arml::Error do
+		errmsg = env['sinatra.error']
+		errmsg.message
+	end
+
 	error do
-		"hai"
+		errmsg = env['sinatra.error']
+		errmsg.message
 	end
 
 	def user
@@ -33,8 +46,8 @@ class Mud < Sinatra::Base
 		redirect("/look#{match}")
 	end
 
-	get %r{/self/(/.+)?} do |match|
-		redirect("/player/#{match}")
+	get %r{/self(/.+)?} do |match|
+		redirect("/player/#{player}#{match}")
 	end
 
 
@@ -53,7 +66,12 @@ class Mud < Sinatra::Base
 
 
 	get '/player/:id/enter_room' do
-		raise "ffs"
+		room_id = params[:room_id] or raise Mud::Error, "Need a room id"
+		if params[:id] != player._id.to_s
+			raise Mud::Error, "You are not that user"
+		end
+		player.move_to_room_id(room_id)
+		return { message: "Moved!"}.to_json
 	end
 
 	get '/player/:id' do
