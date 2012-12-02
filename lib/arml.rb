@@ -10,6 +10,9 @@ class Arml
 		end
 
 		def initialize(key, id)
+			if !id.is_a?(BSON::ObjectId)
+				raise "didn't get a bson id"
+			end
 			@key = key
 			@id = id
 		end

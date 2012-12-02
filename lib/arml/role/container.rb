@@ -6,11 +6,17 @@ class Arml
 
 			# some things have more than one container, eg. room has objects and
 			# players. so default to objects and initialize the instance variable
-			def objects(sym = :@objects)
+			def objs(sym = :@objects)
 				if !instance_variables.include?(sym)
-					instance_variable_set(sym, Set.new)
+					return instance_variable_set(sym, Set.new)
 				end
-				return instance_variable_get(sym)
+				# bit of a hack.. try the accessor first in case it's lazily
+				# initialized
+				if self.respond_to?(sym[1..-1])
+					return self.send(sym[1..-1])
+				end
+				# but otherwise just use our instance variable
+				instance_variable_get(sym)
 			end
 
 			def take(object, collection_name = 'objects', *a)
@@ -21,17 +27,28 @@ class Arml
 
 				# set in our objects
 				sym = "@#{collection_name}".to_sym
-				objects(sym) << object
+				objs(sym) << object
 
 				db_update({}, {'$addToSet' => { collection_name => object.id.to_db }})
 				# remove from old parent
 				if oldparent
-					db.update({}, {'$pull' => { collection_name => object.id.to_db }})
+					oldparent.letgo(object)
+					oldparent.db_update({}, {'$pull' => { collection_name => { id: object.id.id }}})
 				end
 			end
 
-			def has?(object)
-				objects.include?(object)
+			def letgo(object, collection_name = 'objects', *a)
+				bool = self.has?(object)
+				return if !bool
+				sym = "@#{collection_name}".to_sym
+				objs(sym).delete_if {|o| o.id.id == object.id.id}
+			end
+
+			def has?(object, collection_name = 'objects')
+				sym = "@#{collection_name}".to_sym
+				myobjs = objs(sym)
+				bool = myobjs.any? {|e| e.id.id == object.id.id}
+				return bool
 			end
 		end
 	end

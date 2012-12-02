@@ -3,5 +3,7 @@ require 'eventmachine'
 require 'em-synchrony'
 
 EM.synchrony do
-	room = Arml::Room.new({})
+	player = Arml::Player.new({})
+	player.save!
+	p player.id
 end

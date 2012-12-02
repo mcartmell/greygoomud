@@ -12,8 +12,16 @@ class Arml
 		include Arml::Role::Container
 		include Arml::Role::Containable
 
-		alias_method :current_room, :parent
-		alias_method :current_room=, :parent=
+		#alias_method :current_room, :parent
+		#alias_method :current_room=, :parent=
+
+		def current_room
+			parent
+		end
+
+		def current_room=(a)
+			self.parent=(a)
+		end
 
 # @param [Int] room_id The room id to move to
 		def move_to_room_id(room_id, *a)
@@ -30,10 +38,6 @@ class Arml
 			end
 		end
 
-		def build
-			self.parent = nil
-		end
-
 # picks up the object, if it's in the current room
 		def pickup(object)
 			if object.parent == current_room
@@ -45,7 +49,7 @@ class Arml
 
 # drops the object, if the player has it
 		def drop(object)
-			object.drop if has?(object)
+			give(object) if has?(object)
 		end
 
   end

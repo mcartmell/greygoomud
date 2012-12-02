@@ -13,7 +13,7 @@ class Arml
 				raise Arml::Error, "Nothing to drop into"
 			end
 			dest = parent.current_room
-			move_to(dest)
+			dest.take(self)
 		end
 	end
 end

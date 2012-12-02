@@ -58,12 +58,13 @@ class Arml
 #
 # @param [Hash] hash the hash to initialize from
     def set_from_hash(hash = {})
-			self.build #XXX some classes NEED things to be defined. but how does this work with mixins?
+			self.build
       hash.each do |k,v|
 				myk = k
-				if !instance_variables.include?("@#{k}".to_sym)
-					self.instance_variable_set("@#{k}".to_sym, nil)
-				end
+				# set to nil so that any previous values get overridden by the
+				# accessor. classes should use initialize() if they want different
+				# behaviour
+				self.instance_variable_set("@#{k}".to_sym, nil)
 				self.define_singleton_method(myk.to_sym) do
 						iv = self.instance_variable_get("@#{k}".to_sym)
 						return iv if iv
@@ -72,6 +73,8 @@ class Arml
       end
     end
 
+# Attempts to serialize the class by finding any accessors and serializing
+# their values.
     def to_h(type = 'resource')
 			hash = {}
 			self.instance_variables.each do |v|
