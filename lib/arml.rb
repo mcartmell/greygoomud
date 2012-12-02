@@ -94,7 +94,7 @@ class Arml
 					mongolab = URI.parse(mongo_url)
 					conn = EM::Mongo::Connection.new mongolab.host, mongolab.port, 1
 					@@dbname = mongolab.path[1..-1]
-					EM::Synchrony.sync conn.authenticate mongolab.user, mongolab.password
+					EM::Synchrony.sync conn.db(@@dbname).authenticate mongolab.user, mongolab.password
 					conn
 				end
       else
