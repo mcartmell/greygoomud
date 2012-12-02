@@ -14,7 +14,8 @@ class Arml
 					unless key.is_a?(BSON::ObjectId)
 						key = BSON::ObjectId.from_string(key)
 					end
-					result = EM::Synchrony.sync coll.find_one({:_id => key})
+					#EM::Synchrony.gets
+					result = Arml.sync coll.find_one({:_id => key})
 					return result
 				end
 
@@ -62,7 +63,8 @@ class Arml
 
 # Like save, but ensures the the current object is updated from the db
 			def save!
-				id = self.save
+				res = self.save
+				id = (res == true ? self._id : res)
 				self.load(id)
 			end
 
@@ -78,7 +80,8 @@ class Arml
 			end
 
 			def db_insert
-				res = EM::Synchrony.sync coll.safe_insert(to_h)
+				#EM::Synchrony.gets
+				res = EM::Synchrony.sync coll.safe_insert(to_h('db'))
 				handle_error(res)
 				return res
 			end
@@ -96,8 +99,7 @@ class Arml
 
 			def db_set(where = {}, cols = {}, opts = {})
 				where[:_id] = _id
-				fields = { "$set" => cols }
-				puts "doing set where #{where} - #{fields}"
+				fields = { '$set' => cols }
 				res = EM::Synchrony.sync coll.safe_update(where, fields, opts)
 				handle_error(res)
 				return res

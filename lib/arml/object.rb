@@ -6,6 +6,14 @@ class Arml
   class Object < Arml::Common
     DB_KEY = "object"
     include Arml::Role::Storable
+		include Arml::Role::Containable
 
-  end
+		def drop
+			if !parent.current_room
+				raise Arml::Error, "Nothing to drop into"
+			end
+			dest = parent.current_room
+			move_to(dest)
+		end
+	end
 end

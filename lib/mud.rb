@@ -74,12 +74,12 @@ class Mud < Sinatra::Base
 		return { message: "Moved!"}.to_json
 	end
 
-	get '/player/:id' do
+	get '/player/:id' do |id|
 		return Arml::Player.load(id).to_json
 	end
 
 
-	get '/object/:id' do
+	get '/object/:id' do |id|
 		return Arml::Object.load(id).to_json
 	end
   

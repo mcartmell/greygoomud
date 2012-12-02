@@ -1,26 +1,28 @@
 require "arml/base"
 require "arml/common"
 require "arml/role/storable"
+require "arml/role/container"
 
 class Arml
   class Room < Arml::Common
     DB_KEY = "room"
     include Arml::Role::Storable
-		attr_accessor :players, :objects, :exits
+		include Arml::Role::Container
 
-		def initialize(hash)
-			super
-			@players ||= []
-			@objects ||= []
-			@exits ||= {}
-		end
+		attr_accessor :players, :objects, :exits
 
 # Tests if the room has a connection to another
 #
 # @param [Arml::Room] room The other room
 # @return [Bool]
 		def connected_to?(room)
-			return exits.has_value?(room._id)
+			return exits.values.include?(room.id.to_s)
+		end
+
+		def add_exit(direction, room)
+			@exits ||= {}
+			exits[direction] = room
+			db_set({}, { "exits.#{direction}" => room.id.to_db })
 		end
 
   end

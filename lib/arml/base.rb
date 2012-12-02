@@ -1,6 +1,9 @@
+require "arml"
+
 class Arml
   class Base
     attr_reader :db
+		alias :old_to_s :to_s
 
     def db_key
 			self.class.db_key
@@ -14,29 +17,23 @@ class Arml
 			Arml.db.collection(db_key)
 		end
 
+		def self.inherited(base)
+			Arml.collection_classes.push(base)
+		end
+
     def db
       Arml.db
     end
 		
-# Given a hash, initialize the object
-#
-# @param [Hash] hash the hash to initialize from
-    def set_from_hash(hash = {})
-      hash.each do |k,v|
-        self.send(k.to_s + '=', v)
-      end
-			do_coercions
-    end
-
-# Coerce any attributes (eg. ids) into objects
-		def do_coercions
-		end
-
 # Constructs object from a hashref
 #
 # @param [Hash] hash See #set_from_hash
 		def initialize(hash)
 			set_from_hash(hash)
+		end
+
+		def inspect
+			old_to_s
 		end
 
   end

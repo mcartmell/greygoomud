@@ -14,8 +14,9 @@ describe 'The app' do
 
 	it "works" do
 		get '/foo'
-		p last_response.body
 		last_response.status.should == 404
 	end
+
+
 
 end
