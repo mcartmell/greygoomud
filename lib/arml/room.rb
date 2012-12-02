@@ -16,7 +16,7 @@ class Arml
 # @param [Arml::Room] room The other room
 # @return [Bool]
 		def connected_to?(room)
-			return exits.values.map { |e| e.id.id }.include?(room.id.id)
+			return exits.values.any? { |e| e.id == room.id }
 		end
 
 		def add_exit(direction, room)

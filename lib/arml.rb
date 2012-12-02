@@ -5,6 +5,10 @@ class Arml
 	class Id
 		attr_reader :key, :id
 
+		def ==(other_id)
+			return self.id == other_id.id
+		end
+
 		def initialize(key, id)
 			@key = key
 			@id = id
