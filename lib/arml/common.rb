@@ -90,7 +90,7 @@ class Arml
 
 # @return [String] A json representation of the resource
     def to_json(*a)
-      to_resource.to_json(*a)
+      JSON.pretty_generate(to_resource)
     end
 
 # @return [Array] A list of keys that should be used to restrict the resource hash

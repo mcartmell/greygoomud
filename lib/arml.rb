@@ -132,6 +132,9 @@ class Arml
 		def self.find(arml_id)
 			collection_to_class(arml_id.key).load(arml_id.id)	
 		end
+		def self.find_s(str)
+			return find(Arml::Id.from_string(str))
+		end
 end
 
 require "arml/room"

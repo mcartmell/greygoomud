@@ -1,6 +1,7 @@
 require 'json'
 require 'sinatra/base'
 require 'sinatra/synchrony'
+require 'sinatra/json'
 require 'arml'
 
 class Mud < Sinatra::Base
@@ -8,9 +9,11 @@ class Mud < Sinatra::Base
 	end
 
   register Sinatra::Synchrony
+	helpers Sinatra::JSON
 
 	set :reload_templates, false
 	set :show_exceptions, false
+	set :json_encoder, :to_json
 
 	def player
 		@current_player
@@ -26,14 +29,13 @@ class Mud < Sinatra::Base
 		errmsg.message
 	end
 
-	def toj(thing)
-		json = thing.to_json
-		return json
-	end
-
 	error do
 		errmsg = env['sinatra.error']
 		errmsg.message
+	end
+
+	def toj(thing)
+		json thing
 	end
 
 	def user
@@ -50,7 +52,7 @@ class Mud < Sinatra::Base
 	end
 
 	get '/look' do
-		redirect('/room')
+		redirect("/room/#{player.current_room.id}")
 	end
 
 	get %r{/here(/.+)?} do |match|
@@ -58,7 +60,7 @@ class Mud < Sinatra::Base
 	end
 
 	get %r{/self(/.+)?} do |match|
-		redirect("/player/#{player}#{match}")
+		redirect("/player/#{player.id}#{match}")
 	end
 
 
@@ -74,6 +76,9 @@ class Mud < Sinatra::Base
 		if (cr != room && !cr.connected_to?(room))
 			raise Mud::Error, "You don't know about that room"
 		end
+		if (cr != room)
+			player.move_to_room(room)
+		end
 		return toj room
 	end
 
@@ -88,11 +93,11 @@ class Mud < Sinatra::Base
 			raise Mud::Error, "You are not that user"
 		end
 		player.move_to_room_id(room_id)
-		return Arml.find(room_id).to_json
+		return find(room_id).to_json
 	end
 
 	get '/player/:id' do |id|
-		return Arml::Player.load(id).to_json
+		return toj find(id)
 	end
 
 
