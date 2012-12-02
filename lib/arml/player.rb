@@ -43,6 +43,7 @@ class Arml
 		def pickup(object)
 			if object.parent == current_room
 				take(object)
+				self.reload
 			else
 				raise Arml::Error, "Can't take that object"
 			end

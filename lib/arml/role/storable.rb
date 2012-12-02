@@ -16,6 +16,7 @@ class Arml
 					end
 					#EM::Synchrony.gets
 					result = Arml.sync coll.find_one({:_id => key})
+					puts "from db: #{result.inspect}"
 					return result
 				end
 
