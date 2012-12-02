@@ -25,7 +25,9 @@ class Arml
 # @return [Arml::Base]
 
         def load(key)
-          return self.new(retrieve(key))
+					res = retrieve(key)
+					return nil if !res
+          return self.new(res)
         end
       end
 
@@ -80,7 +82,6 @@ class Arml
 			end
 
 			def db_insert
-				#EM::Synchrony.gets
 				res = EM::Synchrony.sync coll.safe_insert(to_h('db'))
 				handle_error(res)
 				return res
@@ -90,6 +91,7 @@ class Arml
 				db_update({}, to_h)
 			end
 
+# Updates an entire row
 			def db_update(where = {}, cols = {}, opts = {})
 				where[:_id] = _id
 				res = EM::Synchrony.sync coll.safe_update(where, cols, opts)
@@ -97,6 +99,7 @@ class Arml
 				return res
 			end
 
+# Just sets an individual column
 			def db_set(where = {}, cols = {}, opts = {})
 				where[:_id] = _id
 				fields = { '$set' => cols }

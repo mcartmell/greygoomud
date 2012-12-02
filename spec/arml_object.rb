@@ -14,6 +14,7 @@ describe Arml::Object do
 			p.move_to(r)
 			p.reload
 			p.take(o)
+			p.has?(o).should == true
 			o.reload
 			o.parent.should == p
 			p.has?(o).should == true

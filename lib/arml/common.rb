@@ -12,6 +12,9 @@ class Arml
 			Arml::Id.new(self.db_key, db_id)
 		end
 
+# Attempts to serialize objects into simple types
+#
+# @param [Object] v The value to serialize
 # @return [Hash] A hash suitable for saving to the database
 		def serialize(v, type = 'resource')
 			if v.is_a?(Arml::Base)
@@ -35,6 +38,11 @@ class Arml
 			return v
 		end
 
+# Attempts to coerce a simple type into an object
+# Basically the opposite of #serialize
+#
+# @param [Object] v The value to coerce
+# @return An inflated value
 		def coerce(v)
 			if v.is_a?(Array)
 				v = v.map{|item| coerce(item)}.to_set

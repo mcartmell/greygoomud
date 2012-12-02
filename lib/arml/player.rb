@@ -33,6 +33,7 @@ class Arml
 			where = {}
 			if force || !current_room || current_room.connected_to?(room)
 				room.take(self, 'players', force)
+				current_room = room
 			else
 				raise Arml::Error, "That room isn't connected to your current room"
 			end
@@ -49,7 +50,9 @@ class Arml
 
 # drops the object, if the player has it
 		def drop(object)
-			letgo(object) if has?(object)
+			raise Arml::Error, "You don't have that object" if !has?(object)
+			current_room.take(object)
+			self.reload # because the object's parent has lost the object, not us
 		end
 
   end

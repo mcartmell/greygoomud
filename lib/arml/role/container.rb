@@ -19,6 +19,9 @@ class Arml
 				instance_variable_get(sym)
 			end
 
+# Takes the object and gives it to self unconditionally
+#
+# @param [Object] object The object to take, must be a Containable
 			def take(object, collection_name = 'objects', *a)
 				oldparent = object.parent
 
@@ -33,16 +36,22 @@ class Arml
 				# remove from old parent
 				if oldparent
 					oldparent.letgo(object)
-					oldparent.db_update({}, {'$pull' => { collection_name => { id: object.id.id }}})
 				end
 			end
 
+# Removes the object from the container. Does not put it anywhere else.
+#
+# @param [Object] object The object to remove
 			def letgo(object, collection_name = 'objects', *a)
 				return if !self.has?(object)
 				sym = "@#{collection_name}".to_sym
 				objs(sym).delete_if {|o| o.id.id == object.id.id}
+				db_update({}, {'$pull' => { collection_name => { id: object.id.id }}})
 			end
 
+# Checks whether an object is in the container
+#
+# @param [Object] object The object to check
 			def has?(object, collection_name = 'objects')
 				sym = "@#{collection_name}".to_sym
 				myobjs = objs(sym)

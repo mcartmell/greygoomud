@@ -43,6 +43,10 @@ class Arml
 	end
 
 		class Error < Exception
+			def to_json
+				hash = { "class" => self.class, "message" => message }
+				return hash.to_json
+			end
 		end
 
 		# when classes inherit Arml::Base, remember their db_keys
@@ -53,6 +57,8 @@ class Arml
 		@@dbname = "arml"
 		@@cache = {}
 
+# This is so we can remember which classes correspond to which mongo
+# collections
 		def self.collection_to_class_map
 			return @@collection_to_class_map if @@collection_to_class_map
 			@@collection_to_class_map = {}
