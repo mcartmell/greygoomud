@@ -251,7 +251,7 @@ StatusCodes = {
 # Render POST/PUT options as forms. We use the _method hack (See use of
 # :method_override)
 	def form_from_options(opts)
-		form_html = nil
+		form_html = ''
 		opts.select {|e| e.has_key?(:method) && e[:method].match(/POST|PUT/)}.each do |opt|
 			form_html += %Q{<h3>#{opt[:description]}</h3>}
 			form_html += %Q{<form method="POST" action="#{opt[:href]}">\n}
@@ -276,7 +276,7 @@ StatusCodes = {
 		unless options.empty? 
 			if accept.media_type?('text/html')
 				form_html = form_from_options(options)
-				if form_html
+				unless form_html.empty?
 					out += "<br><h1>Forms</h1>#{form_html}"
 				end
 				out += "<br><h1>Options</h1><pre>#{linkify(options_json)}</pre>"
