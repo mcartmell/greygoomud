@@ -31,7 +31,7 @@ class Arml
 # @param [Arml::Room] room The room to move to
 		def move_to_room(room, force = false)
 			where = {}
-			if force || current_room.connected_to?(room)
+			if force || !current_room || current_room.connected_to?(room)
 				room.take(self, 'players', force)
 			else
 				raise Arml::Error, "That room isn't connected to your current room"

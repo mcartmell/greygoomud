@@ -16,7 +16,7 @@ class Arml
 		def serialize(v, type = 'resource')
 			if v.is_a?(Arml::Base)
 				if type == 'resource'
-					return v.id.to_s
+					return v.id.to_href
 				else
 					return v.id.to_db
 				end
@@ -29,7 +29,7 @@ class Arml
 				v = serialize(v.to_a)
 			elsif v.is_a?(Array)
 				v.each_with_index do |item, i|
-					v[i] = item
+					v[i] = serialize(item)
 				end
 			end
 			return v
@@ -109,11 +109,12 @@ class Arml
 			hash = to_h
 			hash.keep_if { |k| rkeys.include?(k) }
 			hash[:id] = id
+			hash[:href] = id.to_href
 			hash
 		end
 
 		def ==(object)
-			to_h = object.to_h
+			id == object.id
 		end
 
 

@@ -11,6 +11,9 @@ class Arml
 
 		attr_accessor :players, :exits
 
+		def build
+			@exits ||= {}
+		end
 # Tests if the room has a connection to another
 #
 # @param [Arml::Room] room The other room
@@ -20,7 +23,6 @@ class Arml
 		end
 
 		def add_exit(direction, room)
-			@exits ||= {}
 			exits[direction] = room
 			db_set({}, { "exits.#{direction}" => room.id.to_db })
 		end

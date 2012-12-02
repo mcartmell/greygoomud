@@ -17,8 +17,17 @@ class Arml
 			@id = id
 		end
 
+		def to_href
+			return "#{ENV['ARML_URI_PREFIX']}/#{key}/#{to_s}"
+		end
+
 		def to_s
 			return "#{key}-#{id}"
+		end
+
+		def self.from_string(str)
+			key,id = str.split(/-/)	
+			return self.new(key,BSON::ObjectId.from_string(id))
 		end
 
 		def to_db
