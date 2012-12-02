@@ -38,8 +38,7 @@ class Arml
 			end
 
 			def letgo(object, collection_name = 'objects', *a)
-				bool = self.has?(object)
-				return if !bool
+				return if !self.has?(object)
 				sym = "@#{collection_name}".to_sym
 				objs(sym).delete_if {|o| o.id.id == object.id.id}
 			end
@@ -47,8 +46,7 @@ class Arml
 			def has?(object, collection_name = 'objects')
 				sym = "@#{collection_name}".to_sym
 				myobjs = objs(sym)
-				bool = myobjs.any? {|e| e.id.id == object.id.id}
-				return bool
+				return myobjs.any? {|e| e.id.id == object.id.id}
 			end
 		end
 	end

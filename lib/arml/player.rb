@@ -49,7 +49,7 @@ class Arml
 
 # drops the object, if the player has it
 		def drop(object)
-			give(object) if has?(object)
+			letgo(object) if has?(object)
 		end
 
   end
