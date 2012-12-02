@@ -293,7 +293,6 @@ StatusCodes = {
 		if (cr != room)
 			player.move_to_room(room)
 		end
-		room.reload # why?
 		return render room
 	end
 

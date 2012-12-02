@@ -14,9 +14,7 @@ class Arml
 					unless key.is_a?(BSON::ObjectId)
 						key = BSON::ObjectId.from_string(key)
 					end
-					#EM::Synchrony.gets
 					result = Arml.sync coll.find_one({:_id => key})
-					puts "from db: #{result.inspect}"
 					return result
 				end
 

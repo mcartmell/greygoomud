@@ -35,7 +35,7 @@ class Arml
 				db_update({}, {'$addToSet' => { collection_name => object.id.to_db }})
 				# remove from old parent
 				if oldparent
-					oldparent.letgo(object)
+					oldparent.letgo(object, collection_name)
 				end
 			end
 
@@ -43,7 +43,7 @@ class Arml
 #
 # @param [Object] object The object to remove
 			def letgo(object, collection_name = 'objects', *a)
-				return if !self.has?(object)
+				return if !self.has?(object, collection_name)
 				sym = "@#{collection_name}".to_sym
 				objs(sym).delete_if {|o| o.id.id == object.id.id}
 				db_update({}, {'$pull' => { collection_name => { id: object.id.id }}})
