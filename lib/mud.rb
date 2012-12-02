@@ -15,6 +15,7 @@ class Mud < Sinatra::Base
 	set :reload_templates, false
 	set :show_exceptions, false
 	set :json_encoder, :to_json
+	set :method_override, true # so we can use PUT from forms
 	enable :sessions
 
 StatusCodes = {
@@ -90,7 +91,7 @@ StatusCodes = {
 # @param [String] resource_type The type of resource to get options for
 # @param [Arml::Common] obj The object that the options should apply to
 # @return [Array] An array of hashrefs describing the valid options
-	def get_options_for(resource_type, obj)
+	def get_options_for(resource_type, obj = nil)
 		#TODO can we generate the routes from this?
 		opts = {}
 		opts['object'] = [
@@ -114,6 +115,44 @@ StatusCodes = {
 				prereq: lambda { |p,o| p.has?(o) }
 			}
 		];
+		opts['room'] = [
+			{
+				href: lambda { |o| o[:href] },
+				action: "examine",
+				parameters: {}
+			},
+			{
+				href: lambda { |o| o[:href] + '/create_exit' },
+				action: "create exit",
+				description: "Link this room with another",
+				method: "PUT",
+				parameters: {
+					direction: {
+						type: 'String',
+						description: 'The direction you wish to create the exit on'
+					},
+					to: {
+						type: 'String',
+						description: 'The identifier of the room you want to link to'
+					}
+				}
+			},
+			{
+				href: '/room',
+				method: 'POST',
+				description: 'Create a new room',
+				parameters: {
+					name: {
+						type: 'String',
+						description: 'The name of the room to create'
+					},
+					description: {
+						type: 'String',
+						description: 'A description of the room'
+					}
+				}
+			}
+		];
 
 		return [] if !opts[resource_type]
 
@@ -122,20 +161,26 @@ StatusCodes = {
 
 		# Process some of the values
 		valid_opts.each do |e|
+			skip_key = false
 			e.each do |k,v|
 				# Delete empty keys
 				e.delete(k) if v.respond_to?(:empty?) && v.empty?	
 				# Attempt to resolve lambdas
 				if v.is_a?(Proc)
-					if v.arity == 1
-						# 1-arg functions just need the resource
-						e[k] = v.call(obj.to_resource)
-					elsif v.arity == 2
-						# 2-arg functions need a player and object
-						e[k] = v.call(player,obj)
+					if obj
+						if v.arity == 1
+							# 1-arg functions just need the resource
+							e[k] = v.call(obj.to_resource)
+						elsif v.arity == 2
+							# 2-arg functions need a player and object
+							e[k] = v.call(player,obj)
+						end
+					else
+						skip_key = true
 					end
 				end
 			end
+			e[:prereq] = false if skip_key
 		end
 
 		# Restrict to those that have passed the prereq
@@ -148,17 +193,16 @@ StatusCodes = {
 	def self.init_game
 		return if @@initialized
 		@@initialized = true
-		puts "Initializing game"
 		Arml.db.collection('room').remove({})
 		Arml.db.collection('player').remove({})
 		Arml.db.collection('object').remove({})
 		@@mainroom = Arml::Room.new({ name: 'The entrance hall' })
-		@@mainroom.save!
+		mainroom = @@mainroom
+		mainroom.save!
 		room2 = Arml::Room.new({ name: 'The back room', description: 'A scary place' })
 		room2.save!
-		@@mainroom.add_exit('North', room2)
+		mainroom.add_exit('North', room2)
 		room2.add_exit('South', @@mainroom)
-		mainroom = @@mainroom
 		obj = Arml::Object.new({ name: 'A ball' })
 		obj.save!
 		mainroom.take(obj)
@@ -187,7 +231,7 @@ StatusCodes = {
 	before do
 		ENV["ARML_URI_PREFIX"] = "http://#{request.host_with_port}"
 		Mud.init_game
-		set_player if request.path != '/enter'
+		set_player if request.path != '/enter' && !request.options?
 	end
 
 	error Arml::Error do
@@ -204,6 +248,51 @@ StatusCodes = {
 		return %Q{<h1>#{status} - #{scode(status.to_i)}</h1><a href="/self">self</a> | <a href="/look">look</a><br>}
 	end
 
+# Render POST/PUT options as forms. We use the _method hack (See use of
+# :method_override)
+	def form_from_options(opts)
+		form_html = ''
+		opts.select {|e| e.has_key?(:method) && e[:method].match(/POST|PUT/)}.each do |opt|
+			form_html += %Q{<h3>#{opt[:description]}</h3>}
+			form_html += %Q{<form method="POST" action="#{opt[:href]}">\n}
+			if opt[:method] != "POST"
+				form_html += %Q{<input type="hidden" name="_method" value="#{opt[:method]}">}
+			end
+
+			opt[:parameters].each do |k, v|
+				form_html += %Q{#{v[:description]} <input type="text" name="#{k}"><br>\n}
+			end
+			form_html += '<input type="submit" value="Do"></form><br>'
+		end
+		return form_html
+	end
+
+# Generate HTML from the options if in a browser, otherwise return json
+	def render_options(resource_type, o = nil)
+		accept = env['rack-accept.request']
+		options = get_options_for(resource_type, o)
+		options_json = JSON.pretty_generate(options)
+		out = ""
+		unless options.empty? 
+			if accept.media_type?('text/html')
+				form_html = form_from_options(options)
+				if form_html
+					out += "<br><h1>Forms</h1>#{form_html}"
+				end
+				out += "<br><h1>Options</h1><pre>#{linkify(options_json)}</pre>"
+			else
+				content_type('application/json')
+				out = options_json
+			end
+		end
+		return out
+	end
+
+	def linkify(str)
+			str.gsub( %r{http://[^"\s]+} ) do |url|
+    		"<a href='#{url}'>#{url}</a>"
+			end
+	end
 # Attempts to render 'something' as the client requests it. Yet, it's that
 # generic.
 #
@@ -224,23 +313,17 @@ StatusCodes = {
 			jout = "<pre>#{jout}</pre>"
 
 			out = html_head + jout
+			out = linkify(out)
 
 # If the thing looks like a resource, we can be clever and work out the options
 # for it too
-# TODO: actually set up the OPTIONS routes
 
 			if thing.respond_to?(:db_key)
 				resource_type = thing.db_key
-				options = get_options_for(resource_type, thing)
-				unless options.empty?
-					options_json = JSON.pretty_generate(options)
-					out += "<br><h1>Options</h1><pre>#{options_json}</pre>"
-				end
+				options_html = render_options(resource_type, thing)
+				out += options_html
 			end
 
-			out.gsub!( %r{http://[^"\s]+} ) do |url|
-    		"<a href='#{url}'>#{url}</a>"
-			end
 		else
 			content_type('application/json')
 			out = jout
@@ -271,7 +354,6 @@ StatusCodes = {
 	end
 
 	get %r{/self(/.+)?} do |match|
-		puts "IN SELF #{self.player.id}"
 		redirect("/player/#{self.player.id}#{match}")
 	end
 
@@ -294,6 +376,32 @@ StatusCodes = {
 			player.move_to_room(room)
 		end
 		return render room
+	end
+
+	post '/room' do
+		# assume everyone can create rooms at this point
+		name = params[:name] or raise Mud::Error, "Must at least have a name"
+		hash = {
+			name: name
+		}
+		hash[:description] = params[:description] if params[:description]
+		newroom = Arml::Room.new(hash)
+		newroom.save!
+		status 201
+		return render newroom
+	end
+
+	put '/room/:id/create_exit' do |id|
+		room = find(id) or raise Mud::Error, "No such room"
+		if room != player.current_room
+			raise Mud::Error, "You're not in that room"
+		end
+		direction = params[:direction] or raise Mud::Error, "direction required"
+		to				= params[:to]				 or raise Mud::Error, "to required"
+		to_room = find(to) or raise Mud::Error, "Can't create an exit to a room that doesn't exist"
+		player.create_exit_to(direction, to_room)
+		status 201
+		return render player.current_room
 	end
 
 	get '/player/:id/enter_room' do
@@ -331,7 +439,6 @@ StatusCodes = {
 	end
   
   get '/create' do
-		puts "here\n"
     key = Arml::Room.new({ name: "one", description: "desc" }).save
     return key._id.to_s
   end
@@ -340,5 +447,22 @@ StatusCodes = {
     room = Arml::Room.load(id)
     room.to_json
   end
+
+	get '/room' do
+		render_options('room')
+	end
+
+### RENDER JSON FOR TEH OPTIONS
+	options '/room' do
+		render_options('room')
+	end
+
+	options '/room/:id' do |id|
+		render_options('room', find(id))
+	end
+
+	options '/object/:id' do |id|
+		render_options('object', find(id))
+	end
 
 end

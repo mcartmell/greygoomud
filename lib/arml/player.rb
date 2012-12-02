@@ -39,6 +39,10 @@ class Arml
 			end
 		end
 
+		def create_exit_to(direction, room)
+			current_room.add_exit(direction, room)
+		end
+
 # picks up the object, if it's in the current room
 		def pickup(object)
 			if object.parent == current_room
