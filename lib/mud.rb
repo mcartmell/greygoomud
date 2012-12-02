@@ -87,8 +87,8 @@ StatusCodes = {
 
 # Gets the options for the given object
 #
-# @params [String] resource_type The type of resource to get options for
-# @params [Arml::Common] obj The object that the options should apply to
+# @param [String] resource_type The type of resource to get options for
+# @param [Arml::Common] obj The object that the options should apply to
 # @return [Array] An array of hashrefs describing the valid options
 	def get_options_for(resource_type, obj)
 		#TODO can we generate the routes from this?
