@@ -31,7 +31,6 @@ class Arml
 		end
 
 		def build
-			@objects ||= []
 			self.parent = nil
 		end
 

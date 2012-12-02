@@ -16,7 +16,6 @@ describe Arml::Room do
 			room2.save!
 			room1.add_exit("north", room2)
 			room3 = Arml::Room.load(room1._id)
-			room3.save!
 			check = room3.connected_to?(room2)
 			check.should == true
 			EM.stop

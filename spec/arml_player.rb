@@ -11,7 +11,6 @@ describe Arml::Player do
 			room2.save!
 			player = Arml::Player.new({name: "mikec", description: "hai"})
 			player.save!
-			p room2
 			player.move_to_room(room2, true)
 			player.reload
 			parent = player.parent

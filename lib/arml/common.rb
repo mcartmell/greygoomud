@@ -58,10 +58,12 @@ class Arml
 #
 # @param [Hash] hash the hash to initialize from
     def set_from_hash(hash = {})
-			self.build
+			self.build #XXX some classes NEED things to be defined. but how does this work with mixins?
       hash.each do |k,v|
 				myk = k
-				self.instance_variable_set("@#{k}".to_sym, nil)
+				if !instance_variables.include?("@#{k}".to_sym)
+					self.instance_variable_set("@#{k}".to_sym, nil)
+				end
 				self.define_singleton_method(myk.to_sym) do
 						iv = self.instance_variable_get("@#{k}".to_sym)
 						return iv if iv
