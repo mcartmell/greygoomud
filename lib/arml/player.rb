@@ -5,6 +5,8 @@ require "arml/role/container"
 require "arml/role/containable"
 
 class Arml
+
+# Represents a player in the game
   class Player < Arml::Common
     DB_KEY = "player"
 

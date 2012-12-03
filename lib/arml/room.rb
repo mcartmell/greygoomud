@@ -4,6 +4,7 @@ require "arml/role/storable"
 require "arml/role/container"
 
 class Arml
+# Represents a room in the game
   class Room < Arml::Common
     DB_KEY = "room"
     include Arml::Role::Storable

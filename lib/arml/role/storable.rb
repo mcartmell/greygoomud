@@ -3,6 +3,7 @@ require "uuid"
 
 class Arml
   module Role
+# A module for handling the database backend methods
     module Storable
       module ClassMethods
 

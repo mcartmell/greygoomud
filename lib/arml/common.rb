@@ -1,5 +1,6 @@
 require "json"
 class Arml
+# The base class for all entities (should be renamed really)
   class Common < Arml::Base
     attr_accessor :_id, :name, :description, :parent
 

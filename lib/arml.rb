@@ -1,7 +1,10 @@
 require "em-mongo"
 require 'eventmachine'
 
+# A class of utility methods
 class Arml
+	# Represents an object identifier. Differs from mongo id in that it includes the collection name too
+
 	class Id
 		attr_reader :key, :id
 
@@ -42,6 +45,7 @@ class Arml
 		end
 	end
 
+# Represents a generic error
 		class Error < Exception
 			def to_json
 				hash = { "class" => self.class, "message" => message }

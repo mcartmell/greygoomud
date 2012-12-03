@@ -1,6 +1,7 @@
 require "arml"
 
 class Arml
+# Base class for all objects
   class Base
     attr_reader :db
 		alias :old_to_s :to_s

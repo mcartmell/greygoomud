@@ -3,6 +3,7 @@ require "arml/common"
 require "arml/role/storable"
 
 class Arml
+# An object in th game sense. Currently all objects can be picked up
   class Object < Arml::Common
     DB_KEY = "object"
     include Arml::Role::Storable

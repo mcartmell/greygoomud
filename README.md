@@ -1,4 +1,4 @@
-arml
+Grey Goo
 ====
 
 ## TODO
@@ -11,6 +11,7 @@ arml
 ## TODO in API
 
 * Sending messages to rooms / private messages
-* Combat
+* Combat (ignore death while performing an action)
 * Make not all objects containers
 * More tests
+* Agents

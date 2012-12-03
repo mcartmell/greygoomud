@@ -1,5 +1,6 @@
 class Arml
 	module Role
+# A module for things that can be contained eg. objects and players
 		module Containable
 
 			def move_to_id(dest_id)

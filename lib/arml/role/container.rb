@@ -1,5 +1,6 @@
 class Arml
 	module Role
+#A module for things that can contain other things
 		module Container
 			require 'set'
 			attr_accessor :is_container 
