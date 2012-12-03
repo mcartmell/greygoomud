@@ -1,7 +1,7 @@
 require "json"
 require "uuid"
 
-class Arml
+class GreyGoo
   module Role
 # A module for handling the database backend methods
     module Storable
@@ -15,14 +15,14 @@ class Arml
 					unless key.is_a?(BSON::ObjectId)
 						key = BSON::ObjectId.from_string(key)
 					end
-					result = Arml.sync coll.find_one({:_id => key})
+					result = GreyGoo.sync coll.find_one({:_id => key})
 					return result
 				end
 
 # Loads an object by id
 #
 # @param [Object] key See #retrieve
-# @return [Arml::Base]
+# @return [GreyGoo::Base]
 
         def load(key)
 					res = retrieve(key)
@@ -50,7 +50,7 @@ class Arml
 
 # Retrieves the Mongo collection for this class
 			def coll
-				return Arml.db.collection(db_key)
+				return GreyGoo.db.collection(db_key)
 			end
 
 # Upserts the current object. Updates if _id is set

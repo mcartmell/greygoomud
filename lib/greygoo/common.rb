@@ -1,7 +1,7 @@
 require "json"
-class Arml
+class GreyGoo
 # The base class for all entities (should be renamed really)
-  class Common < Arml::Base
+  class Common < GreyGoo::Base
     attr_accessor :_id, :name, :description, :parent
 
 # @return [BSON::ObjectId] The mongo object id
@@ -10,7 +10,7 @@ class Arml
 		end
 
 		def id
-			Arml::Id.new(self.db_key, db_id)
+			GreyGoo::Id.new(self.db_key, db_id)
 		end
 
 # Attempts to serialize objects into simple types
@@ -18,7 +18,7 @@ class Arml
 # @param [Object] v The value to serialize
 # @return [Hash] A hash suitable for saving to the database
 		def serialize(v, type = 'resource')
-			if v.is_a?(Arml::Base)
+			if v.is_a?(GreyGoo::Base)
 				if type == 'resource'
 					return v.id.to_href
 				else
@@ -49,8 +49,8 @@ class Arml
 				v = v.map{|item| coerce(item)}.to_set
 			elsif v.is_a?(Hash)
 				if v["id"].is_a?(BSON::ObjectId)
-					arml_id = Arml::Id.from_db(v)
-					v = Arml.find(arml_id)
+					greygoo_id = GreyGoo::Id.from_db(v)
+					v = GreyGoo.find(greygoo_id)
 				else
 					v.each do |k,val|
 						v[k] = coerce(val)

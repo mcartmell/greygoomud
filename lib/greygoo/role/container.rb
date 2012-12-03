@@ -1,4 +1,4 @@
-class Arml
+class GreyGoo
 	module Role
 #A module for things that can contain other things
 		module Container

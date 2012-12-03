@@ -1,10 +1,10 @@
-class Arml
+class GreyGoo
 	module Role
 # A module for things that can be contained eg. objects and players
 		module Containable
 
 			def move_to_id(dest_id)
-				move_to(Arml.find(dest_id))
+				move_to(GreyGoo.find(dest_id))
 			end
 
 # Atomically moves the object in the backend

@@ -2,7 +2,7 @@ require "em-mongo"
 require 'eventmachine'
 
 # A class of utility methods
-class Arml
+class GreyGoo
 	# Represents an object identifier. Differs from mongo id in that it includes the collection name too
 
 	class Id
@@ -10,7 +10,7 @@ class Arml
 
 # Compares to another id by comparing the unique mongo id
 #
-# @param [Arml::Id] other_id The id to compare with
+# @param [GreyGoo::Id] other_id The id to compare with
 # @return [Bool] True if equal
 		def ==(other_id)
 			return self.id == other_id.id
@@ -26,7 +26,7 @@ class Arml
 
 # Converts an id to a link
 		def to_href
-			return "#{ENV['ARML_URI_PREFIX']}/#{key}/#{to_s}"
+			return "#{ENV['GREYGOO_URI_PREFIX']}/#{key}/#{to_s}"
 		end
 
 # Converts to a string
@@ -37,7 +37,7 @@ class Arml
 # Creates an Id object from a string
 #
 # @param [String] str The string to coerce
-# @return [Arml::Id] The coerced object
+# @return [GreyGoo::Id] The coerced object
 		def self.from_string(str)
 			key,id = str.split(/-/)	
 			return self.new(key,BSON::ObjectId.from_string(id))
@@ -66,12 +66,12 @@ class Arml
 			end
 		end
 
-		# when classes inherit Arml::Base, remember their db_keys
+		# when classes inherit GreyGoo::Base, remember their db_keys
 		@@collection_classes = []
 		@@collection_to_class_map = nil
 
     @@db = nil
-		@@dbname = "arml"
+		@@dbname = "greygoo"
 		@@cache = {}
 
 # This is so we can remember which classes correspond to which mongo
@@ -106,7 +106,7 @@ class Arml
       db = ""
 			conn = ""
 
-      if mongo_url = ENV["ARML_MONGO_URI"]
+      if mongo_url = ENV["GREYGOO_MONGO_URI"]
 				db = EM::Synchrony::ConnectionPool.new(size: 1) do
 					mongolab = URI.parse(mongo_url)
 					conn = EM::Mongo::Connection.new mongolab.host, mongolab.port, 1
@@ -148,24 +148,24 @@ class Arml
     end
 
 		def self.db_id_to_id(obj, db_id)
-			return Arml::Id.new(obj.db_key, db_id)
+			return GreyGoo::Id.new(obj.db_key, db_id)
 		end
 
 # Find an object by id regardless of its collection
-		def self.find(arml_id)
-			collection_to_class(arml_id.key).load(arml_id.id)	
+		def self.find(greygoo_id)
+			collection_to_class(greygoo_id.key).load(greygoo_id.id)	
 		end
 	
 # Coerces a string to an Id then looks it up
 #
 # @param [String] str
-# @return [Arml::Common]
+# @return [GreyGoo::Common]
 		def self.find_s(str)
-			return find(Arml::Id.from_string(str))
+			return find(GreyGoo::Id.from_string(str))
 		end
 end
 
-require "arml/room"
-require "arml/player"
-require "arml/object"
-require "arml/base"
+require "greygoo/room"
+require "greygoo/player"
+require "greygoo/object"
+require "greygoo/base"

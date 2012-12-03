@@ -1,6 +1,6 @@
-require "arml"
+require "greygoo"
 
-class Arml
+class GreyGoo
 # Base class for all objects
   class Base
     attr_reader :db
@@ -18,16 +18,16 @@ class Arml
 
 # The actual collection for this class
 		def self.coll
-			Arml.db.collection(db_key)
+			GreyGoo.db.collection(db_key)
 		end
 
 # Inherited hook to keep track of classes that have db collections
 		def self.inherited(base)
-			Arml.collection_classes.push(base)
+			GreyGoo.collection_classes.push(base)
 		end
 
     def db
-      Arml.db
+      GreyGoo.db
     end
 		
 # Constructs object from a hashref

@@ -2,11 +2,11 @@ require 'json'
 require 'sinatra/base'
 require 'sinatra/synchrony'
 require 'sinatra/json'
-require 'arml'
+require 'greygoo'
 require 'rack/accept'
 
 class Mud < Sinatra::Base
-	class Error < Arml::Error
+	class Error < GreyGoo::Error
 	end
 
   register Sinatra::Synchrony
@@ -89,7 +89,7 @@ StatusCodes = {
 # Gets the options for the given object
 #
 # @param [String] resource_type The type of resource to get options for
-# @param [Arml::Common] obj The object that the options should apply to
+# @param [GreyGoo::Common] obj The object that the options should apply to
 # @return [Array] An array of hashrefs describing the valid options
 	def get_options_for(resource_type, obj = nil)
 		#TODO can we generate the routes from this?
@@ -193,17 +193,17 @@ StatusCodes = {
 	def self.init_game
 		return if @@initialized
 		@@initialized = true
-		Arml.db.collection('room').remove({})
-		Arml.db.collection('player').remove({})
-		Arml.db.collection('object').remove({})
-		@@mainroom = Arml::Room.new({ name: 'The entrance hall' })
+		GreyGoo.db.collection('room').remove({})
+		GreyGoo.db.collection('player').remove({})
+		GreyGoo.db.collection('object').remove({})
+		@@mainroom = GreyGoo::Room.new({ name: 'The entrance hall' })
 		mainroom = @@mainroom
 		mainroom.save!
-		room2 = Arml::Room.new({ name: 'The back room', description: 'A scary place' })
+		room2 = GreyGoo::Room.new({ name: 'The back room', description: 'A scary place' })
 		room2.save!
 		mainroom.add_exit('North', room2)
 		room2.add_exit('South', @@mainroom)
-		obj = Arml::Object.new({ name: 'A ball' })
+		obj = GreyGoo::Object.new({ name: 'A ball' })
 		obj.save!
 		mainroom.take(obj)
 		initialized = true
@@ -219,7 +219,7 @@ StatusCodes = {
 	get '/enter' do
 		return redirect('/self') if @current_player = find(session[:player_id])
 		name = params[:name] || 'New player'
-		player = Arml::Player.new({ name: name })
+		player = GreyGoo::Player.new({ name: name })
 		player.save!
 		player.move_to_room(@@mainroom)
 		player.reload
@@ -229,12 +229,12 @@ StatusCodes = {
 	end
 
 	before do
-		ENV["ARML_URI_PREFIX"] = "http://#{request.host_with_port}"
+		ENV["GREYGOO_URI_PREFIX"] = "http://#{request.host_with_port}"
 		Mud.init_game
 		set_player if request.path != '/enter' && !request.options?
 	end
 
-	error Arml::Error do
+	error GreyGoo::Error do
 		errmsg = env['sinatra.error']
 		render errmsg
 	end
@@ -336,13 +336,13 @@ StatusCodes = {
 	end
 
   def initialize
-    ENV["ARML_MONGO_URI"] = ENV["MONGOLAB_URI"]
+    ENV["GREYGOO_MONGO_URI"] = ENV["MONGOLAB_URI"]
   end
 
 	def find(id)
 		return nil if !id
-		id = Arml::Id.from_string(id)
-		return Arml.find(id)
+		id = GreyGoo::Id.from_string(id)
+		return GreyGoo.find(id)
 	end
 
 	get '/look' do
@@ -385,7 +385,7 @@ StatusCodes = {
 			name: name
 		}
 		hash[:description] = params[:description] if params[:description]
-		newroom = Arml::Room.new(hash)
+		newroom = GreyGoo::Room.new(hash)
 		newroom.save!
 		status 201
 		return render newroom
@@ -439,12 +439,12 @@ StatusCodes = {
 	end
   
   get '/create' do
-    key = Arml::Room.new({ name: "one", description: "desc" }).save
+    key = GreyGoo::Room.new({ name: "one", description: "desc" }).save
     return key._id.to_s
   end
 
   get '/load/:id' do |id|
-    room = Arml::Room.load(id)
+    room = GreyGoo::Room.load(id)
     room.to_json
   end
 
