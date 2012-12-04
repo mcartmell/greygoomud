@@ -35,6 +35,9 @@ class GreyGoo
 # @param [String] direction A key representing the direction of the exit
 # @param [GreyGoo::Room] room The room to connect to
 		def add_exit(direction, room)
+			if direction.empty?
+				raise GreyGoo::Error, "Direction can't be empty"
+			end
 			exits[direction] = room
 			db_set({}, { "exits.#{direction}" => room.id.to_db })
 		end
