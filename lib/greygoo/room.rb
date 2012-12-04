@@ -23,6 +23,13 @@ class GreyGoo
 			return exits.values.any? { |e| e.id == room.id }
 		end
 
+# Sends a message to all players in the room
+#
+# @param [String] message text
+		def broadcast(m)
+			players.each {|p| p.send_message(m)}
+		end
+
 # Adds a one-way exit to another room
 #
 # @param [String] direction A key representing the direction of the exit

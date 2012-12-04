@@ -1,14 +1,14 @@
-require "arml"
-require "arml/object"
+require "greygoo"
+require "greygoo/object"
 require "em-synchrony"
 
-describe Arml::Object do
+describe GreyGoo::Object do
 	it "can be created and given to a player" do
 		EM.synchrony do
-			o = Arml::Object.new({name: 'test object'})
+			o = GreyGoo::Object.new({name: 'test object'})
 			o.save!
-			p = Arml::Player.new({name: 'test player'})
-			r = Arml::Room.new({})
+			p = GreyGoo::Player.new({name: 'test player'})
+			r = GreyGoo::Room.new({})
 			r.save!
 			p.save!
 			p.move_to(r)

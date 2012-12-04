@@ -16,7 +16,10 @@ class GreyGoo
 				if self.respond_to?(sym[1..-1])
 					return self.send(sym[1..-1])
 				end
-				# but otherwise just use our instance variable
+				# but otherwise just use our instance variable this would be cleaner
+				# if we could guarantee that all objects had accessors, then we could
+				# just use the thing above. but it doesn't seem right to declare
+				# accessors in the consuming class *and* use the role.
 				instance_variable_get(sym)
 			end
 

@@ -16,6 +16,7 @@ class Mud < Sinatra::Base
 	set :show_exceptions, false
 	set :json_encoder, :to_json
 	set :method_override, true # so we can use PUT from forms
+
 	enable :sessions
 
 StatusCodes = {
@@ -93,6 +94,7 @@ StatusCodes = {
 # @return [Array] An array of hashrefs describing the valid options
 	def get_options_for(resource_type, obj = nil)
 		#TODO can we generate the routes from this?
+		#TODO should these be resource objects to save the silly href thing?
 		opts = {}
 		opts['object'] = [
 			{
@@ -115,6 +117,20 @@ StatusCodes = {
 				prereq: lambda { |p,o| p.has?(o) }
 			}
 		];
+		opts['player'] = [
+			{
+				href: lambda { |o| o[:href] },
+				action: "message",
+				description: "Message this user",
+				parameters: {
+					message: {
+						type: 'String',
+						description: 'The text of the message you want to send'
+					}
+				}
+			}
+		];
+
 		opts['room'] = [
 			{
 				href: lambda { |o| o[:href] },
@@ -134,6 +150,18 @@ StatusCodes = {
 					to: {
 						type: 'String',
 						description: 'The identifier of the room you want to link to'
+					}
+				}
+			},
+			{
+				href: lambda { |o| o[:href] + '/broadcast' },
+				action: "broadcast",
+				method: "POST",
+				description: "Send a broadcast message to this room",
+				parameters: {
+					message: {
+						type: 'String',
+						description: 'The text of the message you want to send'
 					}
 				}
 			},
@@ -216,6 +244,7 @@ StatusCodes = {
 		end
 	end
 
+# Create a new player, or redirect if alreay logged in
 	get '/enter' do
 		return redirect('/self') if @current_player = find(session[:player_id])
 		name = params[:name] || 'New player'
@@ -303,7 +332,12 @@ StatusCodes = {
 
 		out = ''
 		jout = ''
-		if thing.respond_to?(:to_json)
+		if thing.respond_to?(:to_resource)
+			res = thing.to_resource
+			if player.has_messages?
+				res.merge(player.get_messages!)
+			end
+		elsif thing.respond_to?(:to_json)
 			jout = thing.to_json
 		else
 			jout = JSON.pretty_generate(thing)
@@ -417,6 +451,18 @@ StatusCodes = {
 		return render find(id)
 	end
 
+	post '/player/:id/message' do |id|
+		p = find(id)
+		player.send_to(p, params[:message])
+	end
+
+	get '/message/:id' do |id|
+		msg = find(id)
+		if msg.to != player && msg.from != player
+			status 403
+			raise Mud::Error, "You can't view that message"
+		end
+	end
 
 	get '/object/:id' do |id|
 		obj = find(id)
@@ -443,13 +489,9 @@ StatusCodes = {
     return key._id.to_s
   end
 
-  get '/load/:id' do |id|
-    room = GreyGoo::Room.load(id)
-    room.to_json
-  end
-
-	get '/room' do
-		render_options('room')
+	post '/room/:id/broadcast' do |id|
+		room = find(room)
+		player.broadcast_to(room, params[:message])
 	end
 
 ### RENDER JSON FOR TEH OPTIONS

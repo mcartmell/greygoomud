@@ -3,6 +3,7 @@ require "greygoo/common"
 require "greygoo/role/storable"
 require "greygoo/role/container"
 require "greygoo/role/containable"
+require "greygoo/message"
 
 class GreyGoo
 
@@ -14,8 +15,11 @@ class GreyGoo
 		include GreyGoo::Role::Container
 		include GreyGoo::Role::Containable
 
-		#alias_method :current_room, :parent
-		#alias_method :current_room=, :parent=
+		attr_accessor :messages
+
+		def build
+			@messages ||= []
+		end
 
 		def current_room
 			parent
@@ -60,6 +64,33 @@ class GreyGoo
 			raise GreyGoo::Error, "You don't have that object" if !has?(object)
 			current_room.take(object)
 			self.reload # because the object's parent has lost the object, not us
+		end
+
+		def has_messages?
+			return !self.messages.empty?
+		end
+
+		def send_to(other_player, msg)
+			m = GreyGoo::Message.new(self, other_player, msg)
+			m.save!
+			other_player.send_message(m)
+		end
+
+		def broadcast_to(room, msg)
+			m = GreyGoo::Message.new(self, room, msg)
+			m.save!
+			room.broadcast(m)
+		end
+
+		def send_message(msg)
+			db_update({}, {'$push' => { 'messages' => msg.id.to_db } })
+			messages.push(msg)
+		end
+
+		def get_messages!
+			# clear messages
+			db_set({}, { messages: [] })			
+			return { messages: GreyGoo.serialize(self.messages) }
 		end
 
   end

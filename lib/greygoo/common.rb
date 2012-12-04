@@ -13,51 +13,12 @@ class GreyGoo
 			GreyGoo::Id.new(self.db_key, db_id)
 		end
 
-# Attempts to serialize objects into simple types
-#
-# @param [Object] v The value to serialize
-# @return [Hash] A hash suitable for saving to the database
-		def serialize(v, type = 'resource')
-			if v.is_a?(GreyGoo::Base)
-				if type == 'resource'
-					return v.id.to_href
-				else
-					return v.id.to_db
-				end
-			elsif v.is_a?(Hash)
-				v.each do |k,val|
-					v[k] = serialize(val)
-				end
-				return v
-			elsif v.is_a?(Set)
-				v = serialize(v.to_a)
-			elsif v.is_a?(Array)
-				v.each_with_index do |item, i|
-					v[i] = serialize(item)
-				end
-			end
-			return v
+		def serialize(*a)
+			return GreyGoo.serialize(*a)
 		end
 
-# Attempts to coerce a simple type into an object
-# Basically the opposite of #serialize
-#
-# @param [Object] v The value to coerce
-# @return An inflated value
 		def coerce(v)
-			if v.is_a?(Array)
-				v = v.map{|item| coerce(item)}.to_set
-			elsif v.is_a?(Hash)
-				if v["id"].is_a?(BSON::ObjectId)
-					greygoo_id = GreyGoo::Id.from_db(v)
-					v = GreyGoo.find(greygoo_id)
-				else
-					v.each do |k,val|
-						v[k] = coerce(val)
-					end
-				end
-			end
-			return v
+			return GreyGoo.coerce(v)
 		end
 
 		def build
