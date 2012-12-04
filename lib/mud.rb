@@ -262,7 +262,8 @@ StatusCodes = {
 # Creates the player from the session key, if it can
 	def set_player
 		unless session[:player_id] && @current_player = find(session[:player_id])
-			raise Mud::Error, "You need to go to /enter first"
+			redirect('/enter')
+			#raise Mud::Error, "You need to go to /enter first"
 		end
 	end
 
