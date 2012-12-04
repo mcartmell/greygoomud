@@ -119,8 +119,9 @@ StatusCodes = {
 		];
 		opts['player'] = [
 			{
-				href: lambda { |o| o[:href] },
+				href: lambda { |o| o[:href] + '/message' },
 				action: "message",
+				method: "POST",
 				description: "Message this user",
 				parameters: {
 					message: {
@@ -150,6 +151,22 @@ StatusCodes = {
 					to: {
 						type: 'String',
 						description: 'The identifier of the room you want to link to'
+					}
+				}
+			},
+			{
+				href: lambda { |o| o[:href] + '/create_object' },
+				action: "create object",
+				method: "POST",
+				description: "Create a new object in this room",
+				parameters: {
+					name: {
+						type: 'String',
+						description: 'The name of the object to create'
+					},
+					description: {
+						type: 'String',
+						description: "The object's description"
 					}
 				}
 			},
@@ -190,21 +207,26 @@ StatusCodes = {
 		# Process some of the values
 		valid_opts.each do |e|
 			skip_key = false
-			e.each do |k,v|
-				# Delete empty keys
-				e.delete(k) if v.respond_to?(:empty?) && v.empty?	
-				# Attempt to resolve lambdas
-				if v.is_a?(Proc)
-					if obj
-						if v.arity == 1
-							# 1-arg functions just need the resource
-							e[k] = v.call(obj.to_resource)
-						elsif v.arity == 2
-							# 2-arg functions need a player and object
-							e[k] = v.call(player,obj)
+			if obj && !e.values.any? {|v| v.is_a?(Proc)}
+				skip_key = true
+			else 
+				e.each do |k,v|
+					# Delete empty keys
+					e.delete(k) if v.respond_to?(:empty?) && v.empty?	
+
+					# Attempt to resolve lambdas
+					if v.is_a?(Proc)
+						if obj
+							if v.arity == 1
+								# 1-arg functions just need the resource
+								e[k] = v.call(obj.to_resource)
+							elsif v.arity == 2
+								# 2-arg functions need a player and object
+								e[k] = v.call(player,obj)
+							end
+						else
+							skip_key = true
 						end
-					else
-						skip_key = true
 					end
 				end
 			end
@@ -239,7 +261,7 @@ StatusCodes = {
 
 # Creates the player from the session key, if it can
 	def set_player
-		if !session[:player_id] || !@current_player = find(session[:player_id])
+		unless session[:player_id] && @current_player = find(session[:player_id])
 			raise Mud::Error, "You need to go to /enter first"
 		end
 	end
@@ -274,7 +296,11 @@ StatusCodes = {
 	end
 
 	def html_head
-		return %Q{<h1>#{status} - #{scode(status.to_i)}</h1><a href="/self">self</a> | <a href="/look">look</a><br>}
+		return %Q{<html><head><title>GreyGoo</title></head><body><h1>#{status} - #{scode(status.to_i)}</h1><a href="/player">player</a> | <a href="/room">room</a><br>}
+	end
+
+	def html_footer
+		%Q{</body></html>}
 	end
 
 # Render POST/PUT options as forms. We use the _method hack (See use of
@@ -300,6 +326,14 @@ StatusCodes = {
 	def render_options(resource_type, o = nil)
 		accept = env['rack-accept.request']
 		options = get_options_for(resource_type, o)
+
+		# If in the root, also get options for the resource
+		if o
+			request.path.match(%r{/(\w+)$}) do |thing|
+				options += get_options_for(thing[1])
+			end
+		end
+
 		options_json = JSON.pretty_generate(options)
 		out = ""
 		unless options.empty? 
@@ -334,9 +368,11 @@ StatusCodes = {
 		jout = ''
 		if thing.respond_to?(:to_resource)
 			res = thing.to_resource
+			# append messages
 			if player.has_messages?
-				res.merge(player.get_messages!)
+				res.update(player.get_messages!)
 			end
+			jout = JSON.pretty_generate(res)
 		elsif thing.respond_to?(:to_json)
 			jout = thing.to_json
 		else
@@ -357,6 +393,8 @@ StatusCodes = {
 				options_html = render_options(resource_type, thing)
 				out += options_html
 			end
+
+			out += html_footer
 
 		else
 			content_type('application/json')
@@ -380,6 +418,7 @@ StatusCodes = {
 	end
 
 	get '/look' do
+		puts self.player.current_room
 		redirect("/room/#{self.player.current_room.id}")
 	end
 
@@ -425,6 +464,18 @@ StatusCodes = {
 		return render newroom
 	end
 
+	post '/room/:id/create_object' do |id|
+		room = find(id) or raise Mud::Error, "No such room"
+		if room != player.current_room
+			raise Mud::Error, "You're not in that room"
+		end
+		o = GreyGoo::Object.new({ name: params[:name], description: params[:description] })
+		o.save!
+		room.take(o)
+		render room
+	end
+
+
 	put '/room/:id/create_exit' do |id|
 		room = find(id) or raise Mud::Error, "No such room"
 		if room != player.current_room
@@ -454,6 +505,7 @@ StatusCodes = {
 	post '/player/:id/message' do |id|
 		p = find(id)
 		player.send_to(p, params[:message])
+		return render p
 	end
 
 	get '/message/:id' do |id|
@@ -462,6 +514,7 @@ StatusCodes = {
 			status 403
 			raise Mud::Error, "You can't view that message"
 		end
+		return render msg
 	end
 
 	get '/object/:id' do |id|
@@ -490,8 +543,22 @@ StatusCodes = {
   end
 
 	post '/room/:id/broadcast' do |id|
-		room = find(room)
+		room = find(id) or raise Mud::Error, "No such room"
 		player.broadcast_to(room, params[:message])
+		player.reload
+		return render room
+	end
+
+	get '/room' do
+		render player.current_room
+	end
+
+	get '/player' do
+		render player
+	end
+
+	get '/object' do
+		render_options('object')
 	end
 
 ### RENDER JSON FOR TEH OPTIONS

@@ -88,7 +88,7 @@ class GreyGoo
 			end
 
 			def db_update_all
-				db_update({}, to_h)
+				db_update({}, to_h('db'))
 			end
 
 # Updates an entire row

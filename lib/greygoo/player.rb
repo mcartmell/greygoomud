@@ -4,6 +4,7 @@ require "greygoo/role/storable"
 require "greygoo/role/container"
 require "greygoo/role/containable"
 require "greygoo/message"
+require 'set'
 
 class GreyGoo
 
@@ -15,10 +16,10 @@ class GreyGoo
 		include GreyGoo::Role::Container
 		include GreyGoo::Role::Containable
 
-		attr_accessor :messages
+		attr_accessor :messages, :current_room
 
 		def build
-			@messages ||= []
+			@messages ||= Set.new
 		end
 
 		def current_room
@@ -71,26 +72,34 @@ class GreyGoo
 		end
 
 		def send_to(other_player, msg)
-			m = GreyGoo::Message.new(self, other_player, msg)
+			m = GreyGoo::Message.new({ from: self, to: other_player, text: msg })
 			m.save!
 			other_player.send_message(m)
 		end
 
 		def broadcast_to(room, msg)
-			m = GreyGoo::Message.new(self, room, msg)
+			m = GreyGoo::Message.new({ from: self, to: room, text: msg })
 			m.save!
 			room.broadcast(m)
 		end
 
 		def send_message(msg)
 			db_update({}, {'$push' => { 'messages' => msg.id.to_db } })
-			messages.push(msg)
+			messages.add(msg)
 		end
 
 		def get_messages!
 			# clear messages
+			msgs = messages
 			db_set({}, { messages: [] })			
-			return { messages: GreyGoo.serialize(self.messages) }
+			messages = Set.new
+			return { messages: GreyGoo.serialize(msgs) }
+		end
+
+		def to_resource
+			r = super
+			r["current room"] = r.delete(:parent)
+			r
 		end
 
   end

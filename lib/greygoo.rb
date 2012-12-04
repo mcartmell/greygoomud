@@ -27,14 +27,14 @@ class GreyGoo
 				end
 			elsif v.is_a?(Hash)
 				v.each do |k,val|
-					v[k] = serialize(val)
+					v[k] = serialize(val, type)
 				end
 				return v
 			elsif v.is_a?(Set)
 				v = serialize(v.to_a)
 			elsif v.is_a?(Array)
 				v.each_with_index do |item, i|
-					v[i] = serialize(item)
+					v[i] = serialize(item, type)
 				end
 			end
 			return v
