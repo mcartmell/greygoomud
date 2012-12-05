@@ -354,7 +354,8 @@ StatusCodes = {
 
 	def linkify(str)
 			str.gsub( %r{http://[^"\s]+} ) do |url|
-    		"<a href='#{url}'>#{url}</a>"
+				short = url.gsub(%r{^.*#{Regexp.quote(request.host_with_port)}}, '')
+    		"<a href='#{url}'>#{short}</a>"
 			end
 	end
 # Attempts to render 'something' as the client requests it. Yet, it's that
