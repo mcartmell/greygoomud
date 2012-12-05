@@ -92,151 +92,8 @@ StatusCodes = {
 # @param [String] resource_type The type of resource to get options for
 # @param [GreyGoo::Common] obj The object that the options should apply to
 # @return [Array] An array of hashrefs describing the valid options
-	def get_options_for(resource_type, obj = nil)
-		#TODO can we generate the routes from this?
-		#TODO should these be resource objects to save the silly href thing?
-		opts = {}
-		opts['object'] = [
-			{
-				href: lambda { |o| o[:href] },
-				action: "examine",
-				parameters: {}
-			},
-			{
-				href: lambda { |o| o[:href] + '/take' },
-				action: "take",
-				description: "Take the object",
-				parameters: {},
-				prereq: lambda { |p,o| p.parent == o.parent }
-			},
-			{
-				href: lambda { |o| o[:href] + '/drop' },
-				action: "drop",
-				description: "Drop the object",
-				parameters: {},
-				prereq: lambda { |p,o| p.has?(o) }
-			}
-		];
-		opts['player'] = [
-			{
-				href: lambda { |o| o[:href] + '/message' },
-				action: "message",
-				method: "POST",
-				description: "Message this user",
-				parameters: {
-					message: {
-						type: 'String',
-						description: 'The text of the message you want to send'
-					}
-				}
-			}
-		];
-
-		opts['room'] = [
-			{
-				href: lambda { |o| o[:href] },
-				action: "examine",
-				parameters: {}
-			},
-			{
-				href: lambda { |o| o[:href] + '/create_exit' },
-				action: "create exit",
-				description: "Link this room with another",
-				method: "PUT",
-				parameters: {
-					direction: {
-						type: 'String',
-						description: 'The direction you wish to create the exit on'
-					},
-					to: {
-						type: 'String',
-						description: 'The identifier of the room you want to link to'
-					}
-				}
-			},
-			{
-				href: lambda { |o| o[:href] + '/create_object' },
-				action: "create object",
-				method: "POST",
-				description: "Create a new object in this room",
-				parameters: {
-					name: {
-						type: 'String',
-						description: 'The name of the object to create'
-					},
-					description: {
-						type: 'String',
-						description: "The object's description"
-					}
-				}
-			},
-			{
-				href: lambda { |o| o[:href] + '/broadcast' },
-				action: "broadcast",
-				method: "POST",
-				description: "Send a broadcast message to this room",
-				parameters: {
-					message: {
-						type: 'String',
-						description: 'The text of the message you want to send'
-					}
-				}
-			},
-			{
-				href: '/room',
-				method: 'POST',
-				description: 'Create a new room',
-				parameters: {
-					name: {
-						type: 'String',
-						description: 'The name of the room to create'
-					},
-					description: {
-						type: 'String',
-						description: 'A description of the room'
-					}
-				}
-			}
-		];
-
-		return [] if !opts[resource_type]
-
-		# Limit to this resource type
-		valid_opts = opts[resource_type]
-
-		# Process some of the values
-		valid_opts.each do |e|
-			skip_key = false
-			if obj && !e.values.any? {|v| v.is_a?(Proc)}
-				skip_key = true
-			else 
-				e.each do |k,v|
-					# Delete empty keys
-					e.delete(k) if v.respond_to?(:empty?) && v.empty?	
-
-					# Attempt to resolve lambdas
-					if v.is_a?(Proc)
-						if obj
-							if v.arity == 1
-								# 1-arg functions just need the resource
-								e[k] = v.call(obj.to_resource)
-							elsif v.arity == 2
-								# 2-arg functions need a player and object
-								e[k] = v.call(player,obj)
-							end
-						else
-							skip_key = true
-						end
-					end
-				end
-			end
-			e[:prereq] = false if skip_key
-		end
-
-		# Restrict to those that have passed the prereq
-		valid_opts.select! {|e| !e.has_key?(:prereq) || e[:prereq] == true}
-
-		return valid_opts
+	def get_options_for(resource_type, *a)
+		return GreyGoo::Options.get_options_for(resource_type, player, *a)
 	end
 
 # Initialize the game (only persists while webserver is running)
@@ -262,7 +119,7 @@ StatusCodes = {
 # Creates the player from the session key, if it can
 	def set_player
 		unless session[:player_id] && @current_player = find(session[:player_id])
-			redirect('/enter')
+			return redirect('/enter')
 			#raise Mud::Error, "You need to go to /enter first"
 		end
 	end
@@ -324,12 +181,12 @@ StatusCodes = {
 	end
 
 # Generate HTML from the options if in a browser, otherwise return json
-	def render_options(resource_type, o = nil)
+	def render_options(resource_type, *a)
 		accept = env['rack-accept.request']
-		options = get_options_for(resource_type, o)
+		options = get_options_for(resource_type, *a)
 
 		# If in the root, also get options for the resource
-		if o
+		unless a.empty?
 			request.path.match(%r{/(\w+)$}) do |thing|
 				options += get_options_for(thing[1])
 			end
@@ -368,8 +225,10 @@ StatusCodes = {
 
 		out = ''
 		jout = ''
+
 		if thing.respond_to?(:to_resource)
-			res = thing.to_resource
+			resource_obj = thing
+			res = resource_obj.to_resource
 			# append messages
 			if player.has_messages?
 				res.update(player.get_messages!)
@@ -521,7 +380,7 @@ StatusCodes = {
 
 	get '/object/:id' do |id|
 		obj = find(id)
-		if !player.has?(obj) && obj.parent != player.current_room
+		if !player.can?(:examine, obj)
 			raise Mud::Error, "You can't see that object"
 		end
 		return render obj
@@ -552,6 +411,7 @@ StatusCodes = {
 	end
 
 	get '/room' do
+		cr = player.current_room
 		render player.current_room
 	end
 

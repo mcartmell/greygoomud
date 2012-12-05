@@ -17,6 +17,7 @@ class GreyGoo
 #
 # @param [Object] v The value to serialize
 # @return [Hash] A hash suitable for saving to the database
+#TODO make this non-destructive
 		def self.serialize(v, type = 'resource')
 			if v.is_a?(GreyGoo::Base)
 				if type == 'resource'
@@ -25,16 +26,19 @@ class GreyGoo
 					return v.id.to_db
 				end
 			elsif v.is_a?(Hash)
+				hash = {}
 				v.each do |k,val|
-					v[k] = serialize(val, type)
+					hash[k] = serialize(val, type)
 				end
-				return v
+				return hash
 			elsif v.is_a?(Set)
-				v = serialize(v.to_a)
+				return serialize(v.to_a)
 			elsif v.is_a?(Array)
+				a = []
 				v.each_with_index do |item, i|
-					v[i] = serialize(item, type)
+					a[i] = serialize(item, type)
 				end
+				return a
 			end
 			return v
 		end
@@ -171,3 +175,9 @@ require "greygoo/base"
 require 'greygoo/id'
 require "greygoo/ability"
 require "greygoo/ability/room"
+require "greygoo/ability/player"
+require "greygoo/ability/object"
+require "greygoo/options"
+require "greygoo/options/room"
+require "greygoo/options/player"
+require "greygoo/options/object"

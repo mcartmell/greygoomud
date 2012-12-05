@@ -3,10 +3,10 @@ class GreyGoo
 	class Options
 		class Room < GreyGoo::Options
 
-			option :enter, href: '_', description: 'Enter the room'
+			option :enter, href: '%', description: 'Enter the room'
 
 			option :create_exit,
-					href: '_/create_exit',
+					href: '%/create_exit',
 				description: "Link this room with another",
 				method: "PUT",
 				parameters: {
@@ -21,7 +21,7 @@ class GreyGoo
 				}
 
 			option :create_object,
-				href: '_/create_object',
+				href: '%/create_object',
 				method: "POST",
 				description: "Create a new object in this room",
 				parameters: {
@@ -36,7 +36,7 @@ class GreyGoo
 				}
 
 			option :broadcast,
-				href: '_/broadcast',
+				href: '%/broadcast',
 				method: "POST",
 				description: "Send a broadcast message to this room",
 				parameters: {

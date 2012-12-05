@@ -87,6 +87,10 @@ class GreyGoo
 			id == object.id
 		end
 
+		def clone
+			return GreyGoo.find(self.id)
+		end
+
 
   end
 end
