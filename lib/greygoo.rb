@@ -1,6 +1,5 @@
 require "em-mongo"
 require 'eventmachine'
-require 'greygoo/id'
 
 # A class of utility methods
 class GreyGoo
@@ -90,6 +89,10 @@ class GreyGoo
 			collection_to_class_map[name]
 		end
 
+		def self.resource_for(classname)
+			classname.db_key
+		end
+
 		def self.collection_classes
 			@@collection_classes
 		end
@@ -165,3 +168,6 @@ require "greygoo/room"
 require "greygoo/player"
 require "greygoo/object"
 require "greygoo/base"
+require 'greygoo/id'
+require "greygoo/ability"
+require "greygoo/ability/room"
