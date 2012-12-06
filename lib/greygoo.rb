@@ -17,7 +17,6 @@ class GreyGoo
 #
 # @param [Object] v The value to serialize
 # @return [Hash] A hash suitable for saving to the database
-#TODO make this non-destructive
 		def self.serialize(v, type = 'resource')
 			if v.is_a?(GreyGoo::Base)
 				if type == 'resource'

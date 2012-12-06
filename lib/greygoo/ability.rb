@@ -34,6 +34,7 @@ class GreyGoo
 		end
 
 		def self.find_action(classname, name)
+			return false if !@@can_map.has_key?(classname)
 			return @@can_map[classname][name]
 		end
 	end

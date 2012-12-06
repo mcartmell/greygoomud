@@ -120,7 +120,6 @@ StatusCodes = {
 	def set_player
 		unless session[:player_id] && @current_player = find(session[:player_id])
 			return redirect('/enter')
-			#raise Mud::Error, "You need to go to /enter first"
 		end
 	end
 
@@ -250,6 +249,7 @@ StatusCodes = {
 # for it too
 
 			if thing.respond_to?(:db_key)
+				#TODO get options by classname instead
 				resource_type = thing.db_key
 				options_html = render_options(resource_type, thing)
 				out += options_html
@@ -279,7 +279,6 @@ StatusCodes = {
 	end
 
 	get '/look' do
-		puts self.player.current_room
 		redirect("/room/#{self.player.current_room.id}")
 	end
 
@@ -290,7 +289,6 @@ StatusCodes = {
 	get %r{/self(/.+)?} do |match|
 		redirect("/player/#{self.player.id}#{match}")
 	end
-
 
   get '/' do
     EM::Synchrony.sleep(10)
@@ -303,10 +301,10 @@ StatusCodes = {
 
 		cr = player.current_room
 
-		if (cr != room && !cr.connected_to?(room))
-			raise Mud::Error, "You don't know about that room"
-		end
 		if (cr != room)
+			unless player.can?(:enter, room)
+				raise Mud::Error, "You don't know about that room"
+			end
 			player.move_to_room(room)
 		end
 		return render room

@@ -10,6 +10,7 @@ class GreyGoo
 			raise "Couldn't find a matching ability for #{action} on #{classname}" unless can_spec
 			arity = 0
 			arity = can_spec[:block].arity - 1 if can_spec.has_key?(:block)
+			arity = 0 if arity < 0 # arity 0 makes no sense - it has to have another class to perform the action on
 			resource = GreyGoo.resource_for(classname)
 			opts.update(arity: arity, class_name: classname, action: action)
 			@@opts[resource] ||= []
@@ -23,6 +24,7 @@ class GreyGoo
 
 # options_for(GreyGoo::Room, player, room_object)
 # options_for(GreyGoo::Room, player)
+#TODO change this to class so we can use subclasses????
 		def self.get_options_for(resource, player, *a)
 			a_size = a.size
 			if a.empty?
