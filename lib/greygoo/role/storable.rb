@@ -107,6 +107,11 @@ class GreyGoo
 				handle_error(res)
 				return res
 			end
+			
+			def db_delete(where = {})
+				where[:_id] = _id
+				coll.remove(where)
+			end
     end
   end
 end

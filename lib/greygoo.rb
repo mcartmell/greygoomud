@@ -13,6 +13,15 @@ class GreyGoo
 			end
 		end
 
+		class NotFoundError < GreyGoo::Error
+		end
+
+		class PermissionsError < GreyGoo::Error
+		end
+
+		class WrongArgsError < GreyGoo::Error
+		end
+
 # Attempts to serialize objects into simple types
 #
 # @param [Object] v The value to serialize
@@ -49,7 +58,7 @@ class GreyGoo
 # @return An inflated value
 		def self.coerce(v)
 			if v.is_a?(Array)
-				v = v.map{|item| coerce(item)}.to_set
+				v = v.map{|item| coerce(item)}.compact.to_set
 			elsif v.is_a?(Hash)
 				if v["id"].is_a?(BSON::ObjectId)
 					greygoo_id = GreyGoo::Id.from_db(v)

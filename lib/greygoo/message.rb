@@ -5,5 +5,9 @@ class GreyGoo
     include GreyGoo::Role::Storable
 		attr_accessor :to, :from, :text
 
+		def read
+			db_delete	
+		end
+
 	end
 end

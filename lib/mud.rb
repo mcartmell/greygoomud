@@ -9,6 +9,10 @@ class Mud < Sinatra::Base
 	class Error < GreyGoo::Error
 	end
 
+	Permissions = GreyGoo::PermissionsError
+	NotFound = GreyGoo::NotFoundError
+	WrongArgs = GreyGoo::WrongArgsError
+
   register Sinatra::Synchrony
 	helpers Sinatra::JSON
 
@@ -142,9 +146,28 @@ StatusCodes = {
 		set_player if request.path != '/enter' && !request.options?
 	end
 
-	error GreyGoo::Error do
+	def render_error
 		errmsg = env['sinatra.error']
 		render errmsg
+	end
+
+	error GreyGoo::Error do
+		render_error
+	end
+
+	error GreyGoo::PermissionsError do
+		status 403
+		render_error
+	end
+
+	error GreyGoo::NotFoundError do
+		status 404
+		render_error
+	end
+
+	error GreyGoo::WrongArgsError do
+		status 400
+		render_error
 	end
 
 	error do
@@ -230,7 +253,8 @@ StatusCodes = {
 			res = resource_obj.to_resource
 			# append messages
 			if player.has_messages?
-				res.update(player.get_messages!)
+				msgs = player.get_messages!
+				res.update(msgs)
 			end
 			jout = JSON.pretty_generate(res)
 		elsif thing.respond_to?(:to_json)
@@ -324,7 +348,7 @@ StatusCodes = {
 	end
 
 	post '/room/:id/create_object' do |id|
-		room = find(id) or raise Mud::Error, "No such room"
+		room = find(id) or raise GreyGoo::NotFoundError, "No such room"
 		if room != player.current_room
 			raise Mud::Error, "You're not in that room"
 		end
@@ -340,21 +364,12 @@ StatusCodes = {
 		if room != player.current_room
 			raise Mud::Error, "You're not in that room"
 		end
-		direction = params[:direction] or raise Mud::Error, "direction required"
-		to				= params[:to]				 or raise Mud::Error, "to required"
-		to_room = find(to) or raise Mud::Error, "Can't create an exit to a room that doesn't exist"
+		direction = params[:direction] or raise GreyGoo::WrongArgsError, "direction required"
+		to				= params[:to]				 or raise GreyGoo::WrongArgsError, "to required"
+		to_room = find(to) or raise GreyGoo::NotFoundError, "Can't create an exit to a room that doesn't exist"
 		player.create_exit_to(direction, to_room)
 		status 201
 		return render player.current_room
-	end
-
-	get '/player/:id/enter_room' do
-		room_id = params[:room_id] or raise Mud::Error, "Need a room id"
-		if params[:id] != player.id
-			raise Mud::Error, "You are not that user"
-		end
-		player.move_to_room_id(room_id)
-		return find(room_id).to_json
 	end
 
 	get '/player/:id' do |id|
@@ -368,18 +383,18 @@ StatusCodes = {
 	end
 
 	get '/message/:id' do |id|
-		msg = find(id)
+		msg = find(id) or raise NotFound, "That message doesn't exist"
 		if msg.to != player && msg.from != player
-			status 403
-			raise Mud::Error, "You can't view that message"
+			raise Permissions, "You can't view that message"
 		end
+		msg.read
 		return render msg
 	end
 
 	get '/object/:id' do |id|
 		obj = find(id)
 		if !player.can?(:examine, obj)
-			raise Mud::Error, "You can't see that object"
+			raise Permissions, "You can't see that object"
 		end
 		return render obj
 	end
@@ -391,7 +406,7 @@ StatusCodes = {
 	end
 
 	get '/object/:id/drop' do |id|
-		obj = find(id)
+		obj = find(id) or raise NotFound, "That object doesn't exist"
 		player.drop(obj)
 		return render player
 	end
@@ -402,7 +417,7 @@ StatusCodes = {
   end
 
 	post '/room/:id/broadcast' do |id|
-		room = find(id) or raise Mud::Error, "No such room"
+		room = find(id) or raise NotFound, "No such room"
 		player.broadcast_to(room, params[:message])
 		player.reload
 		return render room
