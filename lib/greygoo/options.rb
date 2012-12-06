@@ -44,6 +44,7 @@ class GreyGoo
 			valid_opts.select! {|e| player.can?(e[:action], *a) }
 			
 			unless a[0].is_a?(Class)
+				p a
 				ids = a.map { |e| e.id }
 				valid_opts = valid_opts.map { |e| e.clone }
 				# finally, work out the href automatically

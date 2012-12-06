@@ -150,7 +150,7 @@ StatusCodes = {
 	before do
 		ENV["GREYGOO_URI_PREFIX"] = "http://#{request.host_with_port}"
 		Mud.init_game
-		set_player if request.path != '/enter' && !request.options?
+		set_player if request.path != '/enter'
 	end
 
 # Grabs the exception and renders it 
@@ -445,6 +445,11 @@ StatusCodes = {
 	end
 
 ### RENDER JSON FOR TEH OPTIONS
+#TODO why isn't this working?
+	options '/:thing/:id' do |thing, id|
+		render_options(thing, find(id))
+	end
+
 	options '/room' do
 		render_options('room')
 	end
