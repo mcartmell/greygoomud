@@ -46,7 +46,8 @@ and example from an OPTIONS request:
     "class_name": "GreyGoo::Room",
     "action": "create"
   }
-]```
+]
+```
 
 ## TODO
 
