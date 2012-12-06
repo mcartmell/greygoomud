@@ -37,6 +37,7 @@ class GreyGoo
 			set_from_hash(hash)
 		end
 
+# Default to old behaviour when using inspect, since we serialize to the object id with to_s
 		def inspect
 			old_to_s
 		end

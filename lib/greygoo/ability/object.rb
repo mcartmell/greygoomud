@@ -1,5 +1,7 @@
+require "greygoo/object"
 class GreyGoo
 	class Ability
+		# Abilities for objects
 		class Object < GreyGoo::Ability
 			abilities_for GreyGoo::Player
 

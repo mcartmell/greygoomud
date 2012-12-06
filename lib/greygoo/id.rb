@@ -1,4 +1,5 @@
 class GreyGoo
+# Represents an Id object, useful for identifying any object
 	class Id
 		attr_reader :key, :id
 
@@ -47,6 +48,7 @@ class GreyGoo
 			}
 		end
 
+# Coerces an id object from a database hash
 		def self.from_db(hash)
 			return self.new(hash["key"], hash["id"])
 		end

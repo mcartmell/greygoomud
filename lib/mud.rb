@@ -5,12 +5,17 @@ require 'sinatra/json'
 require 'greygoo'
 require 'rack/accept'
 
+# The web app.
 class Mud < Sinatra::Base
+# Errors to do with the web app
 	class Error < GreyGoo::Error
 	end
 
+# alias
 	Permissions = GreyGoo::PermissionsError
+# alias
 	NotFound = GreyGoo::NotFoundError
+# alias
 	WrongArgs = GreyGoo::WrongArgsError
 
   register Sinatra::Synchrony
@@ -23,6 +28,7 @@ class Mud < Sinatra::Base
 
 	enable :sessions
 
+# Just to make the HTML output nicer.
 StatusCodes = {
     100 => 'Continue',
     101 => 'Switching Protocols',
@@ -83,10 +89,12 @@ StatusCodes = {
 	@@mainroom = nil
 	@@initialized = false
 
+# Converts a status code to text
 	def scode(thing)
 		return StatusCodes[thing] || ''
 	end
 
+# Accessor for the player receiving this request
 	def player
 		@current_player
 	end
@@ -94,7 +102,6 @@ StatusCodes = {
 # Gets the options for the given object
 #
 # @param [String] resource_type The type of resource to get options for
-# @param [GreyGoo::Common] obj The object that the options should apply to
 # @return [Array] An array of hashrefs describing the valid options
 	def get_options_for(resource_type, *a)
 		return GreyGoo::Options.get_options_for(resource_type, player, *a)
@@ -146,6 +153,7 @@ StatusCodes = {
 		set_player if request.path != '/enter' && !request.options?
 	end
 
+# Grabs the exception and renders it 
 	def render_error
 		errmsg = env['sinatra.error']
 		render errmsg
@@ -175,10 +183,12 @@ StatusCodes = {
 		errmsg.message
 	end
 
+# Just some html for now
 	def html_head
 		return %Q{<html><head><title>GreyGoo</title></head><body><h1>#{status} - #{scode(status.to_i)}</h1><a href="/player">player</a> | <a href="/room">room</a><br>}
 	end
 
+# Just some html for now
 	def html_footer
 		%Q{</body></html>}
 	end
@@ -231,6 +241,7 @@ StatusCodes = {
 		return out
 	end
 
+# Convert urls to links and shorten the text, purely for making the html look nicer.
 	def linkify(str)
 			str.gsub( %r{http://[^"\s]+} ) do |url|
 				short = url.gsub(%r{^.*#{Regexp.quote(request.host_with_port)}}, '')
@@ -288,14 +299,11 @@ StatusCodes = {
 		return out
 	end
 
-	def user
-		@current_player
-	end
-
   def initialize
     ENV["GREYGOO_MONGO_URI"] = ENV["MONGOLAB_URI"]
   end
 
+# Shortcut to #GreyGoo.find
 	def find(id)
 		return nil if !id
 		id = GreyGoo::Id.from_string(id)

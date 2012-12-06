@@ -7,18 +7,23 @@ class GreyGoo
 
 # Represents a generic error
 		class Error < Exception
+
+# Converts the error object to json
 			def to_json
 				hash = { "class" => self.class, "message" => message }
 				return hash.to_json
 			end
 		end
 
+# 404
 		class NotFoundError < GreyGoo::Error
 		end
 
+# 403
 		class PermissionsError < GreyGoo::Error
 		end
 
+# 400
 		class WrongArgsError < GreyGoo::Error
 		end
 
@@ -75,11 +80,15 @@ class GreyGoo
 
 		# when classes inherit GreyGoo::Base, remember their db_keys
 		@@collection_classes = []
+
+		# the collection to class map
 		@@collection_to_class_map = nil
 
+		# the database handle
     @@db = nil
+
+		# the default database name
 		@@dbname = "greygoo"
-		@@cache = {}
 
 # This is so we can remember which classes correspond to which mongo
 # collections
@@ -97,14 +106,17 @@ class GreyGoo
 			@@collection_to_class_map
 		end
 
+# returns the class name for the collection
 		def self.collection_to_class(name)
 			collection_to_class_map[name]
 		end
 
+# returns the resouece/collection name for the class
 		def self.resource_for(classname)
 			classname.db_key
 		end
 
+# accessor for @@collection_classes
 		def self.collection_classes
 			@@collection_classes
 		end
@@ -133,10 +145,12 @@ class GreyGoo
       @@db = db
     end
 
+# gets the database handle
 		def self.db
 			return self.dbconn.db(@@dbname)
 		end
 
+# Like EM::Synchrony.sync but with a timeout. not used yet.
     def self.sync(df)
       f = Fiber.current
 			myxback = lambda do |type|
@@ -158,6 +172,7 @@ class GreyGoo
       Fiber.yield
     end
 
+# Converts an id from the database into a #GreyGoo::Id object
 		def self.db_id_to_id(obj, db_id)
 			return GreyGoo::Id.new(obj.db_key, db_id)
 		end
@@ -176,11 +191,11 @@ class GreyGoo
 		end
 end
 
-require "greygoo/room"
 require "greygoo/player"
 require "greygoo/object"
 require "greygoo/base"
 require 'greygoo/id'
+require "greygoo/room"
 require "greygoo/ability"
 require "greygoo/ability/room"
 require "greygoo/ability/player"

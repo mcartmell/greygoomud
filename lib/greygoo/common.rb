@@ -9,18 +9,22 @@ class GreyGoo
 			_id
 		end
 
+# The id of this object
 		def id
 			GreyGoo::Id.new(self.db_key, db_id)
 		end
 
+# Serializes the object for storage or serving to a client
 		def serialize(*a)
 			return GreyGoo.serialize(*a)
 		end
 
+# Coerces an object from a database row
 		def coerce(v)
 			return GreyGoo.coerce(v)
 		end
 
+# Should be overridden
 		def build
 		end
 
@@ -69,9 +73,9 @@ class GreyGoo
 			return hash.keys.select { |k| !keys_to_exclude.include?(k) }
 		end
 
+# Unused
 		def keys_to_exclude
 			return []
-			#%w{parent}
 		end
 
 # @return [Hash] A hash representing the api resource
@@ -83,10 +87,12 @@ class GreyGoo
 			hash
 		end
 
+# Compares equality by comparing the ids
 		def ==(object)
 			id == object.id
 		end
 
+# Clones the object by returning a new copy from the database
 		def clone
 			return GreyGoo.find(self.id)
 		end

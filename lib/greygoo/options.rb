@@ -1,9 +1,14 @@
 require "greygoo/ability"
 
 class GreyGoo
+# Describe options for GreyGoo entities
 	class Options
 		@@opts = {}
 
+# Define an option for a class
+#
+# @param [Class] classname The thing to define an option for
+# @param [Symbol] action The name of the action to define options for
 		def self.option(classname = nil, action, opts)
 			classname ||= @options_for
 			can_spec = GreyGoo::Ability.find_action(classname, action)
@@ -17,6 +22,7 @@ class GreyGoo
 			@@opts[resource].push(opts)
 		end
 
+# Work out the name of the corresponding class automatically
 		def self.inherited(by)
 			cname = by.to_s.gsub(/::Options/, '')
 			by.instance_variable_set(:@options_for, eval(cname))

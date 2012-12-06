@@ -3,6 +3,7 @@ class GreyGoo
 # A module for things that can be contained eg. objects and players
 		module Containable
 
+# Moves this thing to another thing referenced by id
 			def move_to_id(dest_id)
 				move_to(GreyGoo.find(dest_id))
 			end

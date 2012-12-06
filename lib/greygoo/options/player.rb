@@ -1,6 +1,7 @@
 require "greygoo/options"
 class GreyGoo
 	class Options
+# Options for Player objects
 		class Player < GreyGoo::Options
 			option :message, href: '%/message',
 				method: "POST",

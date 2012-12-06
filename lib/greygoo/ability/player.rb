@@ -2,6 +2,7 @@ require "greygoo/ability"
 
 class GreyGoo
 	class Ability
+		# Abilities for players
 		class Player < GreyGoo::Ability
 			abilities_for GreyGoo::Player
 

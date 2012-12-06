@@ -6,6 +6,7 @@ require "greygoo/role/container"
 class GreyGoo
 # Represents a room in the game
   class Room < GreyGoo::Common
+# The collection name
     DB_KEY = "room"
     include GreyGoo::Role::Storable
 		include GreyGoo::Role::Container
@@ -25,7 +26,7 @@ class GreyGoo
 
 # Sends a message to all players in the room
 #
-# @param [String] message text
+# @param [String] m message text
 		def broadcast(m)
 			players.each {|p| p.send_message(m)}
 		end

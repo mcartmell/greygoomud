@@ -1,5 +1,6 @@
 class GreyGoo
 	class Ability
+		# Abilities for messages
 		class Message < GreyGoo::Ability
 			ability_for GreyGoo::Player
 

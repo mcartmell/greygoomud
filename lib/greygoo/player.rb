@@ -10,6 +10,7 @@ class GreyGoo
 
 # Represents a player in the game
   class Player < GreyGoo::Common
+# Our database key
     DB_KEY = "player"
 
     include GreyGoo::Role::Storable
@@ -46,6 +47,7 @@ class GreyGoo
 			end
 		end
 
+# Creates an exit from the current room to another
 		def create_exit_to(direction, room)
 			current_room.add_exit(direction, room)
 		end
@@ -67,26 +69,41 @@ class GreyGoo
 			self.reload # because the object's parent has lost the object, not us
 		end
 
+# Does the user have any messages waiting?
 		def has_messages?
-			return !self.messages.empty?
+			return !messages.empty?
 		end
 
+# Send a message to another player
+#
+# @param [GreyGoo::Player] other_player
+# @param [String] msg
 		def send_to(other_player, msg)
 			m = GreyGoo::Message.new({ from: self, to: other_player, text: msg })
 			m.save!
 			other_player.send_message(m)
 		end
 
+# Broadcast a message to a room
+#
+# @param [GreyGoo::Room] room
+# @param [String] msg
 		def broadcast_to(room, msg)
 			m = GreyGoo::Message.new({ from: self, to: room, text: msg })
 			m.save!
 			room.broadcast(m)
 		end
 
+# Deliver a message to this player
+#
+# @param [GreyGoo::Message] msg
 		def send_message(msg)
 			db_update({}, {'$push' => { 'messages' => msg.id.to_db } })
 			messages.add(msg)
 		end
+
+# Gets the messages, and also clear them in the database. Does not actually
+# delete the messages yet, as they might not have been read.
 
 		def get_messages!
 			# clear messages
@@ -96,6 +113,7 @@ class GreyGoo
 			return { messages: GreyGoo.serialize(msgs) }
 		end
 
+# Converts the player to a hash. Renames parent to 'current_room'
 		def to_resource
 			r = super
 			r["current room"] = r.delete(:parent)

@@ -1,5 +1,6 @@
 class GreyGoo
 	class Ability
+		# Actions that can be performed on rooms
 		class Room < GreyGoo::Ability
 			abilities_for GreyGoo::Player
 
@@ -8,7 +9,7 @@ class GreyGoo
 			end
 
 			can :create_exit do |player, room|
-				true
+				player.current_room == room
 			end
 
 			can :create_object do |player, room|

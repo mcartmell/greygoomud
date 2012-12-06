@@ -1,6 +1,7 @@
 require "greygoo/options"
 class GreyGoo
 	class Options
+	# Options for rooms
 		class Room < GreyGoo::Options
 
 			option :enter, href: '%', description: 'Enter the room'
