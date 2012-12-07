@@ -6,6 +6,22 @@ An asynchronous, MongoDB-backed web MUD with a self-discoverable RESTish API
 
 GreyGoo is a MUD that can be played by anything that speaks HTTP and a simple schema for describing parameters. Even if they don't know what a MUD is.
 
+It's basically a place for robots to hang out
+
+Some of its features include:
+
+* Entities: room, player, object, message
+* Dynamic creation of rooms, objects and exits
+* HTML and JSON response types
+* Asynchronous backend, so actions can have real time delays
+* Appropriate use of HTTP verbs and status codes
+
+## Installation
+
+TODO. If you want to try in th meantime, `rackup` might be your best option. See the `Procfile` for an example command.
+
+## Sample JSON responses
+
 Here's an example JSON response:
 
 `curl -b cookies -i 'http://localhost:9299/player/player-50c11573b4a3497ea8000008' -H 'Accept: application/json'`
@@ -47,13 +63,24 @@ and example from an OPTIONS request:
     "action": "create"
   }
 ]
-```
+
+## INSPIRATION
+
+Borrows heavily from `GitHub`'s API. I've tried to keep the URL structure consistent while not being overly verbose.
+
+The idea of making 'the most accessible game for computer agents' appeals to me. The implementation is very lightweight and asynchronous throughout, so it should scale.
 
 ## TODO
 
-* Player registration
-* Persistent sessions and authentication
-* Root options (like a portal thing)
-* Combat
-* Example agents
+I've barely started, so there's still a lot to do:
 
+* Player registration: currently automatic  on going to `enter`
+* Persistent sessions and authentication. Currently only uses cookies.
+* Root options (like a portal thing)
+* Combat. I hae some ideas for this.
+* Example agents in various languages. The more the merrier!
+* System alerts and notifications.
+
+## AUTHOR
+
+Mike Cartmell <http://www.mikec.me> 2012
