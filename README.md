@@ -18,7 +18,7 @@ Some of its features include:
 
 ## Installation
 
-TODO. If you want to try in th meantime, `rackup` might be your best option. See the `Procfile` for an example command.
+TODO. If you want to try in the meantime, `rackup` might be your best option. See the `Procfile` for an example command.
 
 ## Sample JSON responses
 
@@ -63,6 +63,7 @@ and example from an OPTIONS request:
     "action": "create"
   }
 ]
+```
 
 ## INSPIRATION
 
