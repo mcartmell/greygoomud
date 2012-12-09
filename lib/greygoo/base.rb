@@ -29,13 +29,6 @@ class GreyGoo
     def db
       GreyGoo.db
     end
-		
-# Constructs object from a hashref
-#
-# @param [Hash] hash See #set_from_hash
-		def initialize(hash)
-			set_from_hash(hash)
-		end
 
 # Default to old behaviour when using inspect, since we serialize to the object id with to_s
 		def inspect

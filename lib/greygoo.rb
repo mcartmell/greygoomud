@@ -5,6 +5,18 @@ require 'eventmachine'
 class GreyGoo
 	# Represents an object identifier. Differs from mongo id in that it includes the collection name too
 
+		# when classes inherit GreyGoo::Base, remember their db_keys
+		@collection_classes = []
+
+		# the collection to class map
+		@collection_to_class_map = nil
+
+		# the database handle
+    @db = nil
+
+		# the default database name
+		@dbname = "greygoo"
+
 # Represents a generic error
 		class Error < Exception
 
@@ -78,32 +90,20 @@ class GreyGoo
 		end
 
 
-		# when classes inherit GreyGoo::Base, remember their db_keys
-		@@collection_classes = []
-
-		# the collection to class map
-		@@collection_to_class_map = nil
-
-		# the database handle
-    @@db = nil
-
-		# the default database name
-		@@dbname = "greygoo"
-
 # This is so we can remember which classes correspond to which mongo
 # collections
 		def self.collection_to_class_map
-			return @@collection_to_class_map if @@collection_to_class_map
-			@@collection_to_class_map = {}
+			return @collection_to_class_map if @collection_to_class_map
+			@collection_to_class_map = {}
 			ar = collection_classes()
 			ar.each do |e|
 				# some classes don't have a db key, so ignore them
 				begin
-					@@collection_to_class_map[e.db_key] = e
+					@collection_to_class_map[e.db_key] = e
 				rescue
 				end
 			end
-			@@collection_to_class_map
+			@collection_to_class_map
 		end
 
 # returns the class name for the collection
@@ -118,14 +118,14 @@ class GreyGoo
 
 # accessor for @@collection_classes
 		def self.collection_classes
-			@@collection_classes
+			@collection_classes
 		end
 
 # The database accessor
 		def self.dbconn
 			# occasionally it'll disconnect after a query for no reason. this seems
 			# decent protection.
-			return @@db if @@db && @@db.connected?
+			return @db if @db && @db.connected?
       db = ""
 			conn = ""
 
@@ -133,8 +133,8 @@ class GreyGoo
 				db = EM::Synchrony::ConnectionPool.new(size: 1) do
 					mongolab = URI.parse(mongo_url)
 					conn = EM::Mongo::Connection.new mongolab.host, mongolab.port, 1
-					@@dbname = mongolab.path[1..-1]
-					EM::Synchrony.sync conn.db(@@dbname).authenticate mongolab.user, mongolab.password
+					@dbname = mongolab.path[1..-1]
+					EM::Synchrony.sync conn.db(@dbname).authenticate mongolab.user, mongolab.password
 					conn
 				end
       else
@@ -142,12 +142,12 @@ class GreyGoo
 					conn = EM::Mongo::Connection.new('localhost')
 				end
       end
-      @@db = db
+      @db = db
     end
 
 # gets the database handle
 		def self.db
-			return self.dbconn.db(@@dbname)
+			return self.dbconn.db(@dbname)
 		end
 
 # Like EM::Synchrony.sync but with a timeout. not used yet.

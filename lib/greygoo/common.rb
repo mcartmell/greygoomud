@@ -97,6 +97,12 @@ class GreyGoo
 			return GreyGoo.find(self.id)
 		end
 
+# Constructs object from a hashref
+#
+# @param [Hash] hash See #set_from_hash
+		def initialize(hash)
+			set_from_hash(hash)
+		end
 
   end
 end

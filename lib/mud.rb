@@ -86,8 +86,8 @@ StatusCodes = {
 
 	use Rack::Accept
 
-	@@mainroom = nil
-	@@initialized = false
+	@initialized = false
+	@mainroom = nil
 
 # Converts a status code to text
 	def scode(thing)
@@ -97,6 +97,11 @@ StatusCodes = {
 # Accessor for the player receiving this request
 	def player
 		@current_player
+	end
+
+# Accessor for the starting point
+	def mainroom
+		self.class.instance_variable_get(:@mainroom)
 	end
 
 # Gets the options for the given object
@@ -109,18 +114,18 @@ StatusCodes = {
 
 # Initialize the game (only persists while webserver is running)
 	def self.init_game
-		return if @@initialized
-		@@initialized = true
+		return if @initialized
+		@initialized = true
 		GreyGoo.db.collection('room').remove({})
 		GreyGoo.db.collection('player').remove({})
 		GreyGoo.db.collection('object').remove({})
-		@@mainroom = GreyGoo::Room.new({ name: 'The entrance hall' })
-		mainroom = @@mainroom
+		@mainroom = GreyGoo::Room.new({ name: 'The entrance hall' })
+		mainroom = @mainroom
 		mainroom.save!
 		room2 = GreyGoo::Room.new({ name: 'The back room', description: 'A scary place' })
 		room2.save!
 		mainroom.add_exit('North', room2)
-		room2.add_exit('South', @@mainroom)
+		room2.add_exit('South', @mainroom)
 		obj = GreyGoo::Object.new({ name: 'A ball' })
 		obj.save!
 		mainroom.take(obj)
@@ -140,7 +145,7 @@ StatusCodes = {
 		name = params[:name] || 'New player'
 		player = GreyGoo::Player.new({ name: name })
 		player.save!
-		player.move_to_room(@@mainroom)
+		player.move_to_room(mainroom)
 		player.reload
 		session[:player_id] = player.id.to_s
 		@current_player = player
@@ -323,8 +328,7 @@ StatusCodes = {
 	end
 
   get '/' do
-    EM::Synchrony.sleep(10)
-    "Hello world!"
+    EM::Synchrony.sleep(5)
   end
 
 	get '/room/:id' do |id|
@@ -338,6 +342,7 @@ StatusCodes = {
 				raise Mud::Error, "You don't know about that room"
 			end
 			player.move_to_room(room)
+			player.reload
 		end
 		return render room
 	end
