@@ -53,8 +53,8 @@ class GreyGoo
 # @param [Class] classname
 # @param [Symbol] name
 		def self.find_action(classname, name)
-			return false if !@@can_map.has_key?(classname)
-			return @@can_map[classname][name]
+			first_match = classname.ancestors.find {|e| @@can_map.has_key?(e) && @@can_map[e].has_key?(name)}
+			return first_match ? @@can_map[first_match][name] : false
 		end
 	end
 end

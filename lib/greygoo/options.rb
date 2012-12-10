@@ -16,10 +16,9 @@ class GreyGoo
 			arity = 0
 			arity = can_spec[:block].arity - 1 if can_spec.has_key?(:block)
 			arity = 0 if arity < 0 # arity 0 makes no sense - it has to have another class to perform the action on
-			resource = GreyGoo.resource_for(classname)
 			opts.update(arity: arity, class_name: classname, action: action)
-			@@opts[resource] ||= []
-			@@opts[resource].push(opts)
+			@@opts[classname] ||= []
+			@@opts[classname].push(opts)
 		end
 
 # Work out the name of the corresponding class automatically
@@ -28,15 +27,18 @@ class GreyGoo
 			by.instance_variable_set(:@options_for, eval(cname))
 		end
 
+		def self.valid_opts(classname)
+			return classname.ancestors.map {|e| @@opts[e]}.flatten.compact
+		end
+
 # options_for(GreyGoo::Room, player, room_object)
 # options_for(GreyGoo::Room, player)
-#TODO change this to class so we can use subclasses????
-		def self.get_options_for(resource, player, *a)
+		def self.get_options_for(classname, player, *a)
 			a_size = a.size
 			if a.empty?
-			 a = [GreyGoo.collection_to_class(resource)]
+			 a = [classname]
 			end
-			return [] if !valid_opts = @@opts[resource]
+			return [] if !valid_opts = self.valid_opts(classname)
 			# first, limit by arity (the things applying to 0 objects, 1 objects, 2 objects etc.)
 			# creates a new reference so we don't override the resource
 			valid_opts = valid_opts.select {|e| e[:arity] == a_size}

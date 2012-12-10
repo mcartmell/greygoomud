@@ -106,10 +106,10 @@ StatusCodes = {
 
 # Gets the options for the given object
 #
-# @param [String] resource_type The type of resource to get options for
+# @param [Class] resource_type The class to get options for
 # @return [Array] An array of hashrefs describing the valid options
-	def get_options_for(resource_type, *a)
-		return GreyGoo::Options.get_options_for(resource_type, player, *a)
+	def get_options_for(classname , *a)
+		return GreyGoo::Options.get_options_for(classname, player, *a)
 	end
 
 # Initialize the game (only persists while webserver is running)
@@ -220,12 +220,13 @@ StatusCodes = {
 # Generate HTML from the options if in a browser, otherwise return json
 	def render_options(resource_type, *a)
 		accept = env['rack-accept.request']
-		options = get_options_for(resource_type, *a)
+		classname = GreyGoo.collection_to_class(resource_type)
+		options = get_options_for(classname, *a)
 
 		# If in the root, also get options for the resource
 		unless a.empty?
 			request.path.match(%r{/(\w+)$}) do |thing|
-				options += get_options_for(thing[1])
+				options += get_options_for(GreyGoo.collection_to_class(thing[1]))
 			end
 		end
 
