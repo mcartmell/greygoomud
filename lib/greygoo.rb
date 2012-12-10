@@ -193,6 +193,7 @@ end
 
 require "greygoo/player"
 require "greygoo/object"
+require "greygoo/object/weapon"
 require "greygoo/base"
 require 'greygoo/id'
 require "greygoo/room"

@@ -128,7 +128,10 @@ StatusCodes = {
 		room2.add_exit('South', @mainroom)
 		obj = GreyGoo::Object.new({ name: 'A ball' })
 		obj.save!
+		wep = GreyGoo::Object::Weapon.new({ name: 'A SWORD'})
+		wep.save!
 		mainroom.take(obj)
+		mainroom.take(wep)
 		initialized = true
 	end
 
@@ -218,14 +221,17 @@ StatusCodes = {
 	end
 
 # Generate HTML from the options if in a browser, otherwise return json
-	def render_options(resource_type, *a)
+	def render_options(classname, *a)
 		accept = env['rack-accept.request']
-		classname = GreyGoo.collection_to_class(resource_type)
+
+		if !classname.is_a?(Class)
+			classname = GreyGoo.collection_to_class(classname)
+		end
 		options = get_options_for(classname, *a)
 
 		# If in the root, also get options for the resource
 		unless a.empty?
-			request.path.match(%r{/(\w+)$}) do |thing|
+			request.path.match(%r{^/(\w+)$}) do |thing|
 				options += get_options_for(GreyGoo.collection_to_class(thing[1]))
 			end
 		end
@@ -290,9 +296,7 @@ StatusCodes = {
 # for it too
 
 			if thing.respond_to?(:db_key)
-				#TODO get options by classname instead
-				resource_type = thing.db_key
-				options_html = render_options(resource_type, thing)
+				options_html = render_options(thing.class, thing)
 				out += options_html
 			end
 

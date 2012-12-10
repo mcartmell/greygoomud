@@ -20,6 +20,12 @@ class GreyGoo
 			can :create do |player|
 				true
 			end
+
+			class Weapon < GreyGoo::Ability
+				can :wield do |player, object|
+					player.has?(object)
+				end
+			end
 		end
 	end
 end

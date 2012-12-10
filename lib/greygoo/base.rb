@@ -13,7 +13,11 @@ class GreyGoo
 
 # The db collection name for this class
 		def self.db_key
-			const_get('DB_KEY')
+			begin
+				const_get('DB_KEY')
+			rescue
+				nil
+			end
 		end
 
 # The actual collection for this class
@@ -23,7 +27,7 @@ class GreyGoo
 
 # Inherited hook to keep track of classes that have db collections
 		def self.inherited(base)
-			GreyGoo.collection_classes.push(base)
+			GreyGoo.collection_classes.push(base) unless base.db_key
 		end
 
     def db

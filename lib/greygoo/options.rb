@@ -27,6 +27,7 @@ class GreyGoo
 			by.instance_variable_set(:@options_for, eval(cname))
 		end
 
+# Return an array of options defined for this class, including superclasses
 		def self.valid_opts(classname)
 			return classname.ancestors.map {|e| @@opts[e]}.flatten.compact
 		end

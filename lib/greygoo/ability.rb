@@ -33,11 +33,6 @@ class GreyGoo
 			@@can_map[class_name][action] = { block: block }
 		end
 
-#XXX is this needed?
-		def can?(*a)
-			GreyGoo::Ability.can?(self, *a)
-		end
-
 # Checks whether a calling object can perform an action on another object or objects
 #
 # @param [Object] caller
@@ -48,7 +43,7 @@ class GreyGoo
 			return v[:block].call(caller, *a)
 		end
 
-# Checks if an action has been defined for a class
+# Checks if an action has been defined for a class or any of its superclasses
 #
 # @param [Class] classname
 # @param [Symbol] name

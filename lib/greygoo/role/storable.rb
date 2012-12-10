@@ -29,7 +29,8 @@ class GreyGoo
         def load(key)
 					res = retrieve(key)
 					return nil if !res
-          return self.new(res)
+					classname = res.has_key?('_subtype') ? eval(res['_subtype']) : self
+          return classname.new(res)
         end
       end
 

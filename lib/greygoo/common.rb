@@ -2,7 +2,7 @@ require "json"
 class GreyGoo
 # The base class for all entities (should be renamed really)
   class Common < GreyGoo::Base
-    attr_accessor :_id, :name, :description, :parent
+    attr_accessor :_id, :name, :description, :parent, :_subtype
 
 # @return [BSON::ObjectId] The mongo object id
 		def db_id
@@ -34,12 +34,11 @@ class GreyGoo
     def set_from_hash(hash = {})
 			self.build
       hash.each do |k,v|
-				myk = k
 				# set to nil so that any previous values get overridden by the
-				# accessor. classes should use initialize() if they want different
-				# behaviour
+				# accessor. classes should use build() if they want to set default
+				# values.
 				self.instance_variable_set("@#{k}".to_sym, nil)
-				self.define_singleton_method(myk.to_sym) do
+				self.define_singleton_method(k.to_sym) do
 						iv = self.instance_variable_get("@#{k}".to_sym)
 						return iv if iv
 						return self.instance_variable_set("@#{k}".to_sym, coerce(v))
@@ -54,6 +53,10 @@ class GreyGoo
 			self.instance_variables.each do |v|
 				key = v.to_sym[1..-1]
 				next if key == '_id'
+				# convention: skip any keys prefixed with '_'
+				if type == 'resource'
+					next if key[0] == '_'
+				end
 				next if !self.respond_to?(key.to_s)
 				value = self.send(key)
 				value = serialize(value, type)
