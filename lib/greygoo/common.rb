@@ -60,7 +60,7 @@ class GreyGoo
 				next if !self.respond_to?(key.to_s)
 				value = self.send(key)
 				value = serialize(value, type)
-				hash[key.to_sym] = value
+				hash[key.to_sym] = value unless value.respond_to?(:empty?) && value.empty?
 			end
 			return hash
     end

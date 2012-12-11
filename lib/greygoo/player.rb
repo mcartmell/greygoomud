@@ -72,11 +72,11 @@ class GreyGoo
 
 # Does the user have any messages waiting?
 		def has_messages?
-			return !messages.empty?
+			return !(messages.empty?)
 		end
 
 		def has_notices?
-			return !notices.empty?
+			return !(notices.empty?)
 		end
 
 # Send a message to another player

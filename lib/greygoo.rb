@@ -53,7 +53,8 @@ class GreyGoo
 			elsif v.is_a?(Hash)
 				hash = {}
 				v.each do |k,val|
-					hash[k] = serialize(val, type)
+					ser = serialize(val, type)
+					hash[k] = ser
 				end
 				return hash
 			elsif v.is_a?(Set)
@@ -82,7 +83,8 @@ class GreyGoo
 					v = GreyGoo.find(greygoo_id)
 				else
 					v.each do |k,val|
-						v[k] = coerce(val)
+						newval = coerce(val)
+						v[k] = newval
 					end
 				end
 			end
