@@ -13,7 +13,7 @@ class GreyGoo
 
 		def initialize(key, id)
 			if !id.is_a?(BSON::ObjectId)
-				raise "didn't get a bson id"
+				raise "didn't get a bson id, got #{id.inspect}"
 			end
 			@key = key
 			@id = id

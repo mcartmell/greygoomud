@@ -8,16 +8,20 @@ class GreyGoo
 
 			option :create_exit,
 					href: '%/create_exit',
-				description: "Link this room with another",
+				description: "Create an exit on this room",
 				method: "PUT",
 				parameters: {
 					direction: {
 						type: 'String',
 						description: 'The direction you wish to create the exit on'
 					},
-					to: {
+					name: {
 						type: 'String',
-						description: 'The identifier of the room you want to link to'
+						description: 'The name of the new room'
+					},
+					description: {
+						type: 'String',
+						description: 'The description of the new room'
 					}
 				}
 

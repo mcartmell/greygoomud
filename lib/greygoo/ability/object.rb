@@ -6,11 +6,13 @@ class GreyGoo
 			abilities_for GreyGoo::Player
 
 			can :examine do |player, object|
-				player.current_room == object.parent || player.has?(object)
+				(player.current_room == object.parent) || player.has?(object)
 			end
 
 			can :take do |player, object|
-				player.current_room == object.parent
+				#p object.parent
+				#p player.current_room
+				player.current_room.==(object.parent)
 			end
 
 			can :drop do |player, object|

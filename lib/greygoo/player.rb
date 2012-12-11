@@ -17,11 +17,19 @@ class GreyGoo
 		include GreyGoo::Role::Container
 		include GreyGoo::Role::Containable
 
-		attr_accessor :messages, :notices, :current_room
+		attr_accessor :messages, :notices, :current_room, :hit_points, :weapon
 
 		def build
 			@messages ||= Set.new
 			@notices ||= Set.new
+			@hit_points = 10
+		end
+
+		def post_build
+		end
+
+		def is_armed?
+			self.weapon
 		end
 
 		def current_room
@@ -115,7 +123,7 @@ class GreyGoo
 			msgs = messages
 			db_set({}, { messages: [] })			
 			messages = Set.new
-			return { messages: GreyGoo.serialize(msgs) }
+			return { messages: msgs }
 		end
 
 # Converts the player to a hash. Renames parent to 'current_room'
@@ -132,9 +140,45 @@ class GreyGoo
 
 		def get_notices!
 			notes = notices
-			db_set({}, { messages: [] })			
+			db_set({}, { notices: [] })			
 			notices = Set.new
 			return { notices: notes }
 		end
+
+		def wield(w)
+			raise "You don't have that weapon" unless has?(w)
+			self.weapon = w
+		end
+
+		def attack(other_player)
+			raise "You have nothing to attack with" unless is_armed?
+			dmg = weapon.damage
+			other_player.take_damage(dmg)
+			other_player.notify("You have been hit by #{name} for #{dmg} damage")
+			notify("You hit #{other_player.name} for #{dmg} damage")
+		end
+
+		def take_damage(dmg)
+			self.hit_points = self.hit_points - dmg
+			save
+			if dead?
+				die
+			end
+		end
+
+		def die
+			notify("You have died")
+			respawn
+		end
+
+		def respawn
+			hit_points = 10
+			save
+		end
+
+		def dead?
+			hit_points < 0
+		end
   end
+
 end

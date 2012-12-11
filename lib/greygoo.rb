@@ -58,7 +58,7 @@ class GreyGoo
 				end
 				return hash
 			elsif v.is_a?(Set)
-				return serialize(v.to_a)
+				return serialize(v.to_a, type)
 			elsif v.is_a?(Array)
 				a = []
 				v.each_with_index do |item, i|

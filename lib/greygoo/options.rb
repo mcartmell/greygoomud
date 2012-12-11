@@ -52,7 +52,7 @@ class GreyGoo
 				# finally, work out the href automatically
 				valid_opts.each do |e|
 					sub = 0
-					e[:href].gsub!(%r{%}) do 
+					e[:href] = e[:href].gsub(%r{%}) do 
 						next_id = ids[sub]
 						thing_to_sub = sub == 0 ? next_id.to_href : next_id.to_s
 						sub += 1

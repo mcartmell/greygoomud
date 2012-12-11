@@ -24,26 +24,32 @@ class GreyGoo
 			return GreyGoo.coerce(v)
 		end
 
-# Should be overridden
+# Initializes variables before loading of any database values
+# TODO i'm not sure why I decided pre-database building was better.
 		def build
+		end
+
+# Initializes after loading of any database values
+		def post_build
 		end
 
 # Given a hash, initialize the object
 #
 # @param [Hash] hash the hash to initialize from
     def set_from_hash(hash = {})
-			self.build
+			build
       hash.each do |k,v|
 				# set to nil so that any previous values get overridden by the
 				# accessor. classes should use build() if they want to set default
 				# values.
-				self.instance_variable_set("@#{k}".to_sym, nil)
-				self.define_singleton_method(k.to_sym) do
+				instance_variable_set("@#{k}".to_sym, nil)
+				define_singleton_method(k.to_sym) do
 						iv = self.instance_variable_get("@#{k}".to_sym)
 						return iv if iv
 						return self.instance_variable_set("@#{k}".to_sym, coerce(v))
 				end
       end
+			post_build
     end
 
 # Attempts to serialize the class by finding any accessors and serializing

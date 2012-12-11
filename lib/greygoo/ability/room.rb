@@ -13,7 +13,7 @@ class GreyGoo
 			end
 
 			can :create_object do |player, room|
-				true
+				player.current_room == room
 			end
 
 			can :broadcast do |player, room|

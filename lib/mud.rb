@@ -148,7 +148,11 @@ StatusCodes = {
 		name = params[:name] || 'New player'
 		player = GreyGoo::Player.new({ name: name })
 		player.save!
+		sw = GreyGoo::Object::Weapon.new({ name: 'Starter sword'})
+		sw.save!
+		player.take(sw)
 		player.move_to_room(mainroom)
+		player.notify("You have entered the game")
 		player.reload
 		session[:player_id] = player.id.to_s
 		@current_player = player
@@ -212,8 +216,10 @@ StatusCodes = {
 				form_html += %Q{<input type="hidden" name="_method" value="#{opt[:method]}">}
 			end
 
-			opt[:parameters].each do |k, v|
-				form_html += %Q{#{v[:description]} <input type="text" name="#{k}"><br>\n}
+			if opt.has_key?(:parameters)
+				opt[:parameters].each do |k, v|
+					form_html += %Q{#{v[:description]} <input type="text" name="#{k}"><br>\n}
+				end
 			end
 			form_html += '<input type="submit" value="Do"></form><br>'
 		end
@@ -277,10 +283,10 @@ StatusCodes = {
 			# append messages
 			if player.has_messages?
 				msgs = player.get_messages!
-				res.update(msgs)
+				res.update(GreyGoo.serialize(msgs))
 			end
 			if player.has_notices?
-				res.update(player.get_notices!)
+				res.update(GreyGoo.serialize(player.get_notices!))
 			end
 			jout = JSON.pretty_generate(res)
 		elsif thing.respond_to?(:to_json)
@@ -380,14 +386,21 @@ StatusCodes = {
 	end
 
 
+
+
 	put '/room/:id/create_exit' do |id|
 		room = find(id) or raise Mud::Error, "No such room"
 		if room != player.current_room
 			raise Mud::Error, "You're not in that room"
 		end
 		direction = params[:direction] or raise GreyGoo::WrongArgsError, "direction required"
-		to				= params[:to]				 or raise GreyGoo::WrongArgsError, "to required"
-		to_room = find(to) or raise GreyGoo::NotFoundError, "Can't create an exit to a room that doesn't exist"
+		name = params[:name] or raise GreyGoo::WrongArgsError, "Must at least have a name"
+		hash = {
+			name: name
+		}
+		hash[:description] = params[:description] if params[:description]
+		to_room = GreyGoo::Room.new(hash)
+		to_room.save!
 		player.create_exit_to(direction, to_room)
 		status 201
 		return render player.current_room
@@ -401,6 +414,13 @@ StatusCodes = {
 		p = find(id)
 		player.send_to(p, params[:message])
 		return render p
+	end
+
+	put '/player/:id/attack' do |id|
+		op = find(id) or raise NotFound, "That player doesn't exist"
+		raise Permissions, "You can't attack that user" unless player.can?(:attack, op)
+		player.attack(op)
+		return render player
 	end
 
 	get '/message/:id' do |id|
@@ -431,7 +451,14 @@ StatusCodes = {
 		player.drop(obj)
 		return render player
 	end
-  
+
+	get '/object/:id/wield' do |id|
+		obj = find(id) or raise NotFound, "That object doesn't exist"
+		player.wield(obj)
+		player.save
+		return render player
+	end
+
   get '/create' do
     key = GreyGoo::Room.new({ name: "one", description: "desc" }).save
     return key._id.to_s
@@ -463,6 +490,14 @@ StatusCodes = {
 		render_options(thing, find(id))
 	end
 
+	options '/player' do
+		render_options('player')
+	end
+
+	options '/object' do
+		render_options('object')
+	end
+
 	options '/room' do
 		render_options('room')
 	end
@@ -473,6 +508,10 @@ StatusCodes = {
 
 	options '/object/:id' do |id|
 		render_options('object', find(id))
+	end
+
+	options '/player/:id' do |id|
+		render_options('player', find(id))
 	end
 
 end
