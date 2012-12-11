@@ -17,10 +17,11 @@ class GreyGoo
 		include GreyGoo::Role::Container
 		include GreyGoo::Role::Containable
 
-		attr_accessor :messages, :current_room
+		attr_accessor :messages, :notices, :current_room
 
 		def build
 			@messages ||= Set.new
+			@notices ||= Set.new
 		end
 
 		def current_room
@@ -74,6 +75,10 @@ class GreyGoo
 			return !messages.empty?
 		end
 
+		def has_notices?
+			return !notices.empty?
+		end
+
 # Send a message to another player
 #
 # @param [GreyGoo::Player] other_player
@@ -119,6 +124,17 @@ class GreyGoo
 			r["current room"] = r.delete(:parent)
 			r
 		end
+	
+		def notify(msg)
+			db_update({}, {'$push' => { 'notices' => msg } })
+			notices.add(msg)
+		end
 
+		def get_notices!
+			notes = notices
+			db_set({}, { messages: [] })			
+			notices = Set.new
+			return { notices: notes }
+		end
   end
 end

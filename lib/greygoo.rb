@@ -46,7 +46,7 @@ class GreyGoo
 		def self.serialize(v, type = 'resource')
 			if v.is_a?(GreyGoo::Base)
 				if type == 'resource'
-					return v.id.to_href
+					return v.id.to_resource
 				else
 					return v.id.to_db
 				end

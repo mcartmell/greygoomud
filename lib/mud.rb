@@ -279,6 +279,9 @@ StatusCodes = {
 				msgs = player.get_messages!
 				res.update(msgs)
 			end
+			if player.has_notices?
+				res.update(player.get_notices!)
+			end
 			jout = JSON.pretty_generate(res)
 		elsif thing.respond_to?(:to_json)
 			jout = thing.to_json

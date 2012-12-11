@@ -24,6 +24,14 @@ class GreyGoo
 			return "#{ENV['GREYGOO_URI_PREFIX']}/#{key}/#{to_s}"
 		end
 
+		def to_resource
+			return {
+				href: to_href,
+				id: to_s,
+				rel: key
+			}
+		end
+
 # Converts to a string
 		def to_s
 			return "#{key}-#{id}"
