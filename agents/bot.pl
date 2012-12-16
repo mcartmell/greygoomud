@@ -22,6 +22,9 @@ $mech->add_header(Accept => 'application/json');
 # start the game
 $mech->get("$host/enter");
 
+my $key = json()->{session_key};
+$mech->add_header('X-Authentication' => $key);
+
 while(1) {
 	# check out our surroundings first
 	$mech->get("$host/look");

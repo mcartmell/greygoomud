@@ -5,6 +5,7 @@ require "greygoo/role/container"
 require "greygoo/role/containable"
 require "greygoo/message"
 require 'set'
+require 'uuid'
 
 class GreyGoo
 
@@ -17,7 +18,15 @@ class GreyGoo
 		include GreyGoo::Role::Container
 		include GreyGoo::Role::Containable
 
-		attr_accessor :messages, :notices, :current_room, :hit_points, :weapon
+		attr_accessor :messages, :notices, :current_room, :hit_points, :weapon, :_api_key, :_session_key
+
+		def self.find_by_session(key)
+			result = GreyGoo.sync coll.find_one({:_session_key => key})
+			return if !result
+			if result
+				return self.load(result['_id'])
+			end
+		end
 
 		def build
 			@messages ||= Set.new
@@ -26,6 +35,11 @@ class GreyGoo
 		end
 
 		def post_build
+			uuid = UUID.new
+			self._api_key ||= uuid.generate
+			# for now, allow login just with session key. eventually users should
+			# request token from the api key
+			self._session_key ||= uuid.generate
 		end
 
 		def is_armed?

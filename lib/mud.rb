@@ -135,16 +135,26 @@ StatusCodes = {
 		initialized = true
 	end
 
+	def get_player_from_session
+		if key = request.env['HTTP_X_AUTHENTICATION']
+			@current_player = GreyGoo::Player.find_by_session(key)
+		elsif session[:player_id]
+			@current_player = find(session[:player_id])
+		else
+			return
+		end
+	end
+
 # Creates the player from the session key, if it can
 	def set_player
-		unless session[:player_id] && @current_player = find(session[:player_id])
+		unless get_player_from_session
 			return redirect('/enter')
 		end
 	end
 
 # Create a new player, or redirect if alreay logged in
 	get '/enter' do
-		return redirect('/self') if @current_player = find(session[:player_id])
+		return redirect('/self') if get_player_from_session
 		name = params[:name] || 'New player'
 		player = GreyGoo::Player.new({ name: name })
 		player.save!
@@ -156,7 +166,9 @@ StatusCodes = {
 		player.reload
 		session[:player_id] = player.id.to_s
 		@current_player = player
-		redirect('/self')
+		return render({
+			:session_key => @current_player._session_key
+		})
 	end
 
 	before do
