@@ -28,7 +28,7 @@ class GreyGoo
 
         def load(key)
 					res = retrieve(key)
-					return nil if !res
+					raise GreyGoo::Error, "No such thing in db: #{key}" if !res
 					classname = res.has_key?('_subtype') ? eval(res['_subtype']) : self
           return classname.new(res)
         end
@@ -72,6 +72,7 @@ class GreyGoo
 			def save!
 				res = self.save
 				id = (res == true ? self._id : res)
+				raise GreyGoo::Error, "Didn't get an id" if !id
 				self.load(id)
 			end
 

@@ -166,6 +166,7 @@ class GreyGoo
 
 		def attack(other_player)
 			raise "You have nothing to attack with" unless is_armed?
+			EM::Synchrony.sleep(weapon.speed)
 			dmg = weapon.damage
 			other_player.take_damage(dmg)
 			other_player.notify("You have been hit by #{name} for #{dmg} damage")

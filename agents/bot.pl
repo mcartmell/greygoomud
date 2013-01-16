@@ -20,7 +20,7 @@ my $mech = WWW::Mechanize->new;
 $mech->add_header(Accept => 'application/json');
 
 # start the game
-$mech->get("$host/enter");
+$mech->get("$host/enter?name=MuadDib");
 
 my $key = json()->{session_key};
 $mech->add_header('X-Authentication' => $key);
